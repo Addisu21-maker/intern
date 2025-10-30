@@ -17,37 +17,27 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Make the API call to the backend for login
       const response = await axios.post('http://localhost:4000/api/users/login', loginData);
 
       if (response.status === 200) {
-        // Save the JWT token to localStorage
-        localStorage.setItem('token', response.data.token);
+        const user = response.data.user;
 
-        // Debugging: Check if loginData.userId is being set correctly
-        console.log('User ID to be saved:', loginData.userId);
-        
-        // Save userId to localStorage
-        localStorage.setItem('userId', loginData.userId); // Save userId to localStorage
+        localStorage.setItem('userId', user._id);  // store user _id for quiz submission
+        localStorage.setItem('token', user._id);   // optional
+        localStorage.setItem('name', user.name);
 
-        console.log('Token and userId saved to localStorage');
-        
         alert('Login successful!');
-        
-        // Redirect to the quiz page
-        navigate('/quizPage');
+        navigate('/quizPage');  // redirect
       } else {
         alert('Login failed.');
       }
     } catch (error) {
-      console.error('Error:', error);
-      if (error.response) {
-        alert(`Login failed: ${error.response.data.message}`);
-      } else {
-        alert('Login failed. Please try again later.');
-      }
+      console.error('Login error:', error);
+      alert(error.response?.data?.message || 'Login failed.');
     }
   };
+
+
 
   return (
     <div className="login-page">
@@ -85,7 +75,7 @@ const LoginPage = () => {
           <h2>About the Quiz App</h2>
           <p>The quiz app is simple and intuitive with its own set of rules.</p>
           <p>
-            Enter your user ID and default password, click the login button, and navigate to the dashboard to start answering quiz questions.
+            Enter your user ID and default password that is given by the Admin , click the login button, and navigate to the dashboard to start answering quiz questions.
           </p>
         </div>
       </div>

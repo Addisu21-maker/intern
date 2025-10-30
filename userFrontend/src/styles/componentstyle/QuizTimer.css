@@ -6,7 +6,7 @@
   margin-bottom: 10px;
   background: linear-gradient(90deg, #3c26bd, #3b1d5a);
   width: max-content;
-  padding:10px 15px;
+  padding: 10px 15px;
   border-radius: 20%;
   margin-left: 70%;
 }
@@ -44,4 +44,10 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+}
+
+.quiz-completed-message h3 {
+
+  color: green;
 }

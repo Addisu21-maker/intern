@@ -20,7 +20,7 @@ router.post('/add-user', async (req, res) => {
   // Generate unique ID for the user
   // const userId = 'user' + Date.now();
 
-  
+
   const newUser = new User({
     userId,
     name,
@@ -91,24 +91,34 @@ router.put('/users/edit-user/:id', async (req, res) => {
 
 //check that the user is registered or not
 
+// Login route
 router.post('/users/login', async (req, res) => {
   const { userId, password } = req.body;
 
   try {
-    // Find user by email
+    // Find user by userId
     const user = await User.findOne({ userId });
 
-    // If user not found
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-
-    if (password != user.password) {
+    // Check password (plain text)
+    if (password !== user.password) {
       return res.status(401).json({ message: 'Invalid password.' });
     }
 
-    res.status(200).json({ message: 'Login successful!' });
+    // Return user info so frontend can store it
+    res.status(200).json({
+      message: 'Login successful!',
+      user: {
+        _id: user._id,      // For storing userId in localStorage
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
 
   } catch (error) {
     console.error('Login error:', error);

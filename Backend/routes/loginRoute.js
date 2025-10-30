@@ -1,36 +1,38 @@
 import express from 'express';
-import bcrypt from 'bcrypt';
-import User from '../models/logModel.js';
-
+import User from '../models/userModel.js';
 const router = express.Router();
 
-// Login Route
-router.post("/login", async (req, res) => {
+// Login Route (plain text password)
+router.post('/users/login', async (req, res) => {
+    const { userId, password } = req.body;  // frontend sends { userId, password }
+
     try {
-        const { email, password } = req.body;
+        // Find user by userId
+        const user = await User.findOne({ userId });
 
-        // Check if email and password are provided
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required.' });
-        }
-
-        // Find user by email
-        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password.' });
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        // Compare the provided password with the stored hashed password
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-            return res.status(400).json({ message: 'Invalid email or password.' });
+        if (password !== user.password) {
+            return res.status(401).json({ message: 'Invalid password.' });
         }
 
-        // Respond with success if login is successful
-        res.status(200).json({ message: 'Login successful', user });
+        // Return user info including _id so frontend can store it
+        res.status(200).json({
+            message: 'Login successful!',
+            user: {
+                _id: user._id,
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error during login' });
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 

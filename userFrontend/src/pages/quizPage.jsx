@@ -40,28 +40,40 @@ const UserPage = () => {
   // Fetch questions and pass total time to QuizCard
   const fetchQuestions = async (quizId, enteredPasscode) => {
     try {
-      const response = await axios.post(`http://localhost:4000/api/quiz/${quizId}/questions`, {
+      // 1️⃣ Fetch the latest quiz info
+      const quizRes = await axios.get(`http://localhost:4000/api/quizzes`);
+      const latestQuiz = quizRes.data.find((q) => q._id === quizId);
+
+      if (!latestQuiz) {
+        setMessage('Quiz not found');
+        return;
+      }
+
+      // 2️⃣ Check passcode and fetch questions
+      const questionsRes = await axios.post(`http://localhost:4000/api/quiz/${quizId}/questions`, {
         passcode: enteredPasscode,
       });
-      if (response.data && response.data.length > 0) {
-        setQuestions(response.data);
-        setMessage('');
-        // Redirect to QuizCard component with questions and total time
+
+      if (questionsRes.data && questionsRes.data.length > 0) {
+        // 3️⃣ Navigate to QuizCard with latest totalTime
         navigate(`/quiz/${quizId}`, {
           state: {
-            questions: response.data,
-            quizName: selectedQuiz.quizName,
-            totalTime: selectedQuiz.totalTime,
+            quizId: latestQuiz._id,
+            questions: questionsRes.data,
+            quizName: latestQuiz.quizName,
+            totalTime: latestQuiz.totalTime, // ✅ latest value
           },
         });
+        setMessage('');
       } else {
         setMessage('No questions available.');
       }
     } catch (error) {
-      setMessage('Incorrect passcode or failed to fetch questions.');
       console.error('Error fetching questions:', error);
+      setMessage('Incorrect passcode or failed to fetch questions.');
     }
   };
+
 
   // Trigger when a user clicks on a quiz
   const handleQuizClick = (quiz) => {
@@ -85,7 +97,7 @@ const UserPage = () => {
 
   return (
     <div>
-      <h2>Quizzes</h2>
+      <h1 align="center ">Quizzes DashBoard</h1>
       <div className="quizzes-container">
         {quizzes.length > 0 ? (
           quizzes.map((quiz) => (
@@ -108,7 +120,7 @@ const UserPage = () => {
       {showPasscodeModal && (
         <div className="passcode-modal">
           <form onSubmit={handlePasscodeSubmit}>
-            <h3>Enter Passcode for {selectedQuiz?.quizName}</h3>
+            <h3>Enter Passcode for taking the quiz {selectedQuiz?.quizName}</h3>
             <input
               type="password"
               value={passcode}

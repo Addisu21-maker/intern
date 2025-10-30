@@ -25,7 +25,7 @@ const App = () => {
 
     // Check if the current path is one of the quiz-related pages
     if (quizRelatedPaths.some(path => location.pathname.startsWith(path))) {
-      return <Header2 />; 
+      return <Header2 />;
     }
     return <Header />; // Default header for other pages
   };
@@ -33,7 +33,7 @@ const App = () => {
   // Conditionally render the footer based on the current path
   const renderFooter = () => {
     const quizRelatedPaths = ['/quizPage', '/resultPage', '/quiz/'];
-    
+
     // Hide the footer on quiz-related pages
     if (quizRelatedPaths.some(path => location.pathname.startsWith(path))) {
       return null; // Do not render footer on quiz pages
@@ -44,14 +44,14 @@ const App = () => {
   return (
     <div>
       {renderHeader()} {/* Conditionally render the header */}
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/help" element={<Help />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
-        
+
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/quizPage" element={<QuizPage />} />

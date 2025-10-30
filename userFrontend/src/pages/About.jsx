@@ -7,19 +7,22 @@ const AboutPage = () => {
       <div className="about-content">
         <h1 className="about-heading">About Our Quiz App</h1>
         <p className="about-paragraph">
-          Welcome to our Quiz App! This app is designed to make learning fun and engaging by testing your knowledge across various topics. Whether you're a student preparing for exams, a trivia enthusiast, or someone who loves a challenge, our quiz app offers a fun and interactive way to learn and grow.
-        </p>
+
+
+          Welcome to our Quiz Application!
+          This platform is designed to make job recruitment smarter and easier for both employers and job applicants.
+
+          Our goal is to help organizations test and evaluate candidates’ skills quickly and fairly through interactive online quizzes. Employers can create customized quizzes, review results instantly, and make better hiring decisions — all in one place. </p>
         <h3 className="features-heading">Key Features:</h3>
         <ul className="features-list">
           <li>🎯 Multiple categories to choose from</li>
           <li>⏱️ Timed quizzes for added challenge</li>
           <li>📈 Track your scores and progress</li>
           <li>🧠 Questions of varying difficulty levels</li>
-          <li>🔗 Option to share your results with friends</li>
+          <li>🔗 Option to share your results with others</li>
         </ul>
         <p className="about-paragraph">
-          Our mission is to provide a platform where learning meets entertainment, ensuring users enjoy their journey while acquiring new knowledge. Stay curious, keep quizzing, and see how you compare with others on the leaderboard!
-        </p>
+          The mission of this quiz application is to streamline the recruitment process by offering a reliable, automated system that assesses candidates’ competencies through customizable quizzes, ensuring objective evaluation and faster hiring decisions.  </p>
       </div>
     </div>
   );
