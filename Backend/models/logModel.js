@@ -13,6 +13,11 @@ const signUpSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    role: {
+        type: String,
+        enum: ['admin', 'user'],
+        default: 'admin', // Default to admin for admin signup
+    },
 });
 
 // Hash password before saving

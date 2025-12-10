@@ -30,8 +30,8 @@ router.post('/quizzes/:quizId/submit', async (req, res) => {
 
     // Save quiz result
     const newResult = new QuizResult({
-      userId: mongoose.Types.ObjectId(userId),
-      quizId: mongoose.Types.ObjectId(quizId),
+      userId: new mongoose.Types.ObjectId(userId),
+      quizId: new mongoose.Types.ObjectId(quizId),
       score,
       answers,
       timestamp: new Date(),
@@ -50,13 +50,15 @@ router.post('/quizzes/:quizId/submit', async (req, res) => {
 router.get('/quiz-results', async (req, res) => {
   try {
     const results = await QuizResult.find()
-      .populate('userId', 'name email') // populate user details
-      .populate('quizId', 'quizName');  // populate quiz name
+      .populate('userId', 'name email userId') // populate user details
+      .populate('quizId', 'quizName')  // populate quiz name
+      .sort({ timestamp: -1 }); // Sort by most recent first
 
+    console.log(`Fetched ${results.length} quiz results`);
     res.status(200).json(results);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to fetch quiz results' });
+    console.error('Error fetching quiz results:', err);
+    res.status(500).json({ message: 'Failed to fetch quiz results', error: err.message });
   }
 });
 

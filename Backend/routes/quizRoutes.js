@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Quiz from '../models/quizModel.js';
 import Category from '../models/categoryModel.js';
 import QuizResult from '../models/quizResultModel.js'; // Make sure this exists
@@ -121,19 +122,29 @@ router.post('/quizzes/:quizId/submit', async (req, res) => {
   console.log('Received quiz submission:', { quizId, userId, answers, score, timeTaken });
 
   try {
-    if (!userId || !answers || score === undefined || !timeTaken) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    if (!userId || !answers || score === undefined) {
+      return res.status(400).json({ message: 'Missing required fields: userId, answers, and score are required' });
+    }
+
+    // Validate userId and quizId are valid ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid userId format' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ message: 'Invalid quizId format' });
     }
 
     const newResult = new QuizResult({
-      userId,
-      quizId,
+      userId: new mongoose.Types.ObjectId(userId),
+      quizId: new mongoose.Types.ObjectId(quizId),
       answers,
       score,
-      timeTaken
+      timeTaken: timeTaken || 0,
+      timestamp: new Date()
     });
 
     await newResult.save();
+    console.log('Quiz result saved successfully:', newResult._id);
     res.status(201).json({ message: 'Quiz submitted successfully', result: newResult });
   } catch (error) {
     console.error('Error saving quiz result:', error);
