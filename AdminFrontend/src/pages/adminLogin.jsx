@@ -9,7 +9,7 @@ const LoginPage = () => {
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const navigate = useNavigate(); // To navigate after success
-  
+
     // Function to handle form submission
     async function handleLogin(e) {
         e.preventDefault();
@@ -20,13 +20,13 @@ const LoginPage = () => {
                 password
             });
             console.log(response.data);
-            
+
             // Store the token in localStorage and sessionStorage
             if (response.data.token) {
                 localStorage.setItem("authToken", response.data.token);
                 sessionStorage.setItem("authToken", response.data.token);
             }
-            
+
             setSuccessMessage("Login successful! Redirecting...");
             setTimeout(() => {
                 navigate("/dashboard"); // Redirect to Dashboard page
@@ -36,7 +36,7 @@ const LoginPage = () => {
             setTimeout(() => setError(""), 4000); // Clear error message after 4 seconds
         }
     }
-      
+
     return (
         <div className="form-container">
             <div className="form">
@@ -66,9 +66,7 @@ const LoginPage = () => {
                     {successMessage && <p className="success-message">{successMessage}</p>}
                     <button type="submit" className="form-btn">Login</button>
                 </form>
-                <div className="redirect-link">
-                    <p>Don't have an account? <Link to="/signup">Signup here</Link></p>
-                </div>
+
             </div>
         </div>
     );

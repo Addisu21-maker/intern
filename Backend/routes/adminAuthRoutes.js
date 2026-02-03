@@ -62,8 +62,8 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        return res.status(200).json({ 
-            token, 
+        return res.status(200).json({
+            token,
             message: 'Login successful!',
             user: {
                 email: user.email,
@@ -73,6 +73,38 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Admin login error:', error);
         return res.status(500).json({ message: 'Server error. Please try again.' });
+    }
+});
+
+// Admin change password
+router.put('/change-password', async (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+
+    try {
+        if (!email || !currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+
+        const user = await SignUp.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Verify current password
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid current password.' });
+        }
+
+        // Update password (pre-save hook will hash it)
+        user.password = newPassword;
+        await user.save();
+
+        res.status(200).json({ message: 'Password updated successfully.' });
+
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: 'Server error.' });
     }
 });
 

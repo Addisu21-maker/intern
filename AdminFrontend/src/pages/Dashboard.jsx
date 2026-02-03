@@ -1,5 +1,24 @@
 import React, { useState, useEffect } from "react";
 import '../styles/Dashborad.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -11,6 +30,8 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [chartData, setChartData] = useState([]);
 
   // Fetching stats data from backend
   const fetchDashboardStats = async () => {
@@ -24,17 +45,65 @@ const Dashboard = () => {
         attempts: data.attempts || 0,
         passRate: data.passRate || 0,
       });
-      setLoading(false);
+      // Don't set loading here main fetchData handles sequence
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
       setError("Failed to load data. Please try again.");
+    }
+  };
+
+  // Fetching globally
+  const fetchData = async () => {
+    try {
+      await fetchDashboardStats();
+      await fetchChartData();
+    } catch (e) {
+      console.error("Error in fetch chain", e);
+    } finally {
       setLoading(false);
     }
   };
 
+  const fetchChartData = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/dashboard-chart-data");
+      if (response.ok) {
+        const data = await response.json();
+        setChartData(data);
+      }
+    } catch (error) {
+      console.error("Error fetching chart data", error);
+    }
+  };
+
   useEffect(() => {
-    fetchDashboardStats();
+    fetchData();
   }, []);
+
+  // Chart Configuration
+  const barChartData = {
+    labels: chartData.map(d => d.quizName),
+    datasets: [
+      {
+        label: 'Attempts',
+        data: chartData.map(d => d.attempts),
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      },
+      {
+        label: 'Pass Rate (%)',
+        data: chartData.map(d => d.passRate),
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Quiz Statistics' },
+    },
+  };
 
   if (loading) {
     return <div className="dashboard">Loading...</div>;
@@ -65,15 +134,9 @@ const Dashboard = () => {
           <p>{stats.passRate}%</p>
         </div>
       </div>
-      <div className="chart-section">
-        <div className="chart">
-          <h3>User Growth</h3>
-          <p>Placeholder for chart</p>
-        </div>
-        <div className="chart">
-          <h3>Quiz Performance</h3>
-          <p>Placeholder for chart</p>
-        </div>
+
+      <div className="charts-container" style={{ marginTop: '40px', padding: '20px', background: 'white', borderRadius: '8px' }}>
+        <Bar options={chartOptions} data={barChartData} />
       </div>
     </div>
   );

@@ -38,12 +38,7 @@ const QuizCard = () => {
 
     const interval = setInterval(() => {
       setQuizDuration(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleTimeUp();
-          return 0;
-        }
-        const newDuration = prev - 1;
+        const newDuration = Math.max(0, prev - 1);
         localStorage.setItem(timerKey, newDuration);
         return newDuration;
       });
@@ -51,6 +46,13 @@ const QuizCard = () => {
 
     return () => clearInterval(interval);
   }, [quizCompleted, timerKey]);
+
+  // Check for timeout
+  useEffect(() => {
+    if (quizDuration === 0 && !quizCompleted) {
+      handleTimeUp();
+    }
+  }, [quizDuration, quizCompleted]);
 
   const handleTimeUp = () => {
     setQuizCompleted(true);

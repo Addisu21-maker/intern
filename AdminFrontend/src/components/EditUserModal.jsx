@@ -5,8 +5,11 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
 
+  const [password, setPassword] = useState('');
+
   const handleUpdate = async () => {
     try {
+      // 1. Update User Details
       const response = await fetch(`http://localhost:4000/api/users/edit-user/${user._id}`, {
         method: 'PUT',
         headers: {
@@ -16,10 +19,22 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error updating user:', errorData.message || 'Unknown error');
-        alert('Failed to update user. Please try again.');
-        return;
+        throw new Error('Failed to update user details');
+      }
+
+      // 2. Update Password (if provided)
+      if (password.trim()) {
+        const pwResponse = await fetch(`http://localhost:4000/api/users/change-password/${user._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ newPassword: password }),
+        });
+
+        if (!pwResponse.ok) {
+          throw new Error('User updated, but failed to update password');
+        }
       }
 
       // Successfully updated user
@@ -28,7 +43,7 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
       fetchUsers(); // Re-fetch users to reflect the changes
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('An error occurred while updating the user. Please try again later.');
+      alert(error.message || 'An error occurred while updating the user.');
     }
   };
 
@@ -53,6 +68,13 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
           type="text"
           value={role}
           onChange={(e) => setRole(e.target.value)}
+        />
+        <label>One-Time Password Change (Optional)</label>
+        <input
+          type="text"
+          placeholder="New password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <div className="modal-buttons">
           <button onClick={() => setShowModal(false)}>Cancel</button>
