@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
+  const [sex, setSex] = useState(user.sex || 'Male');
   const [userId, setUserId] = useState(user.userId);
   const [score, setScore] = useState(user.score);
 
@@ -12,40 +14,28 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
   const handleUpdate = async () => {
     try {
       // 1. Update User Details
-      const response = await fetch(`http://localhost:4000/api/users/edit-user/${user._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, role, userId, score }),
+      await axios.put(`http://localhost:4000/api/users/edit-user/${user._id}`, {
+        name,
+        email,
+        role,
+        userId,
+        score,
+        sex,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user details');
-      }
 
       // 2. Update Password (if provided)
       if (password.trim()) {
-        const pwResponse = await fetch(`http://localhost:4000/api/users/change-password/${user._id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ newPassword: password }),
+        await axios.put(`http://localhost:4000/api/users/change-password/${user._id}`, {
+          newPassword: password,
         });
-
-        if (!pwResponse.ok) {
-          throw new Error('User updated, but failed to update password');
-        }
       }
 
-      // Successfully updated user
       alert('User updated successfully');
-      setShowModal(false); // Close modal after successful update
-      fetchUsers(); // Re-fetch users to reflect the changes
+      setShowModal(false);
+      fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
-      alert(error.message || 'An error occurred while updating the user.');
+      alert(error.response?.data?.message || 'An error occurred while updating the user.');
     }
   };
 
@@ -72,11 +62,15 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
           onChange={(e) => setEmail(e.target.value)}
         />
         <label>Role</label>
-        <input
-          type="text"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        />
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+        <label>Sex</label>
+        <select value={sex} onChange={(e) => setSex(e.target.value)}>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
         <label>Score</label>
         <input
           type="number"

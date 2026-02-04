@@ -24,6 +24,8 @@ const QuizManagement = () => {
   const [categories, setCategories] = useState([]);
   const [totalTime, setTotalTime] = useState(30);
   const [passcode, setPasscode] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editQuizId, setEditQuizId] = useState('');
 
@@ -53,7 +55,7 @@ const QuizManagement = () => {
 
   // Handle quiz creation
   const handleCreateQuiz = async () => {
-    const data = { quizName, categories: [selectedCategory], totalTime, passcode };
+    const data = { quizName, categories: [selectedCategory], totalTime, passcode, startDate, startTime };
     try {
       const response = await fetch('http://localhost:4000/api/create-quiz', {
         method: 'POST',
@@ -62,12 +64,14 @@ const QuizManagement = () => {
       });
 
       if (response.ok) {
-        alert('Quiz created successfully');
+        alert('Quiz created successfully and students notified');
         fetchQuizzes();
         setQuizName('');
         setSelectedCategory('');
         setTotalTime(30);
         setPasscode('');
+        setStartDate('');
+        setStartTime('');
       } else {
         const errorData = await response.json();
         alert(`Failed to create quiz: ${errorData.message}`);
@@ -99,16 +103,15 @@ const QuizManagement = () => {
 
   // Handle quiz editing
   const handleEditQuiz = async () => {
-    const data = { quizName, categories: [selectedCategory], totalTime, passcode };
+    const data = { quizName, categories: [selectedCategory], totalTime, passcode, startDate, startTime };
     try {
       const response = await fetch(`http://localhost:4000/api/edit-quiz/${editQuizId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-  
+
       if (response.ok) {
-        const updatedQuiz = await response.json();
         alert('Quiz updated successfully');
         fetchQuizzes();
         setIsEditing(false);
@@ -117,6 +120,8 @@ const QuizManagement = () => {
         setSelectedCategory('');
         setTotalTime(30);
         setPasscode('');
+        setStartDate('');
+        setStartTime('');
       } else {
         const errorData = await response.json();
         alert(`Failed to update quiz: ${errorData.message}`);
@@ -126,7 +131,7 @@ const QuizManagement = () => {
       alert('Error updating quiz');
     }
   };
-  
+
   // Update selected category
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
@@ -200,6 +205,29 @@ const QuizManagement = () => {
           margin="normal"
         />
 
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <TextField
+            label="Start Date"
+            variant="outlined"
+            fullWidth
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Start Time"
+            variant="outlined"
+            fullWidth
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+        </div>
+
         <Button
           variant="contained"
           color="primary"
@@ -221,6 +249,7 @@ const QuizManagement = () => {
                 <TableCell>Category</TableCell>
                 <TableCell>Total Time</TableCell>
                 <TableCell>Passcode</TableCell>
+                <TableCell>Start Schedule</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -232,6 +261,7 @@ const QuizManagement = () => {
                     <TableCell>{getCategoryNames(quiz.categories)}</TableCell>
                     <TableCell>{quiz.totalTime} minutes</TableCell>
                     <TableCell>{quiz.passcode}</TableCell>
+                    <TableCell>{quiz.startDate || 'N/A'} at {quiz.startTime || 'N/A'}</TableCell>
                     <TableCell>
                       <Button
                         variant="outlined"
@@ -243,6 +273,8 @@ const QuizManagement = () => {
                           setSelectedCategory(quiz.categories[0]._id);
                           setTotalTime(quiz.totalTime);
                           setPasscode(quiz.passcode);
+                          setStartDate(quiz.startDate || '');
+                          setStartTime(quiz.startTime || '');
                         }}
                       >
                         <FaEdit /> Edit

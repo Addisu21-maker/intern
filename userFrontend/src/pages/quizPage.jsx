@@ -6,12 +6,14 @@ import '../styles/pagesStyle/quizPage.css';
 const UserPage = () => {
   const [categories, setCategories] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
+  const [completedQuizIds, setCompletedQuizIds] = useState(new Set());
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [showPasscodeModal, setShowPasscodeModal] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const userId = localStorage.getItem('userId');
 
   // Check if user is authenticated
   useEffect(() => {
@@ -27,13 +29,21 @@ const UserPage = () => {
     navigate('/login');
   };
 
-  // Fetch all quizzes on page load
-  const fetchQuizzes = async () => {
+  // Fetch all quizzes and user's results
+  const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/quizzes');
-      setQuizzes(response.data);
+      // Fetch quizzes
+      const quizResponse = await axios.get('http://localhost:4000/api/quizzes');
+      setQuizzes(quizResponse.data);
+
+      // Fetch user's completed quizzes if logged in
+      if (userId) {
+        const resultResponse = await axios.get(`http://localhost:4000/api/user/${userId}/results`);
+        const completedIds = new Set(resultResponse.data.map(r => r.quizId?._id || r.quizId));
+        setCompletedQuizIds(completedIds);
+      }
     } catch (error) {
-      console.error('Error fetching quizzes:', error);
+      console.error('Error fetching data:', error);
     }
   };
 
@@ -65,39 +75,64 @@ const UserPage = () => {
           },
         });
         setMessage('');
+        setShowPasscodeModal(false);
       } else {
         setMessage('No questions available.');
       }
     } catch (error) {
       console.error('Error fetching questions:', error);
-      setMessage('Incorrect passcode or failed to fetch questions.');
+      setShowPasscodeModal(false); // Close the modal
+      if (error.response && error.response.status === 401) {
+        setMessage('Incorrect passcode');
+      } else {
+        setMessage('Failed to fetch questions. Please try again.');
+      }
     }
   };
 
 
   // Trigger when a user clicks on a quiz
   const handleQuizClick = (quiz) => {
+    if (completedQuizIds.has(quiz._id)) {
+      setMessage('You have already completed this quiz!');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
     setSelectedQuiz(quiz);
     setShowPasscodeModal(true);
   };
 
   // Handle passcode submission and fetch questions
-  const handlePasscodeSubmit = (e) => {
+  const handlePasscodeSubmit = async (e) => {
     e.preventDefault();
+    setMessage(''); // Clear any previous error messages
     if (selectedQuiz) {
-      fetchQuestions(selectedQuiz._id, passcode); // Fetch questions and redirect to the quiz card
-      setShowPasscodeModal(false);
+      await fetchQuestions(selectedQuiz._id, passcode);
     }
   };
 
-  // Load quizzes on page load
+  // Load data on page load
   useEffect(() => {
-    fetchQuizzes();
-  }, []);
+    fetchData();
+  }, [userId]);
 
   return (
     <div>
       <h1 align="center ">Quizzes DashBoard</h1>
+      {message && (
+        <div style={{
+          textAlign: 'center',
+          color: '#ef4444',
+          background: '#fee2e2',
+          padding: '10px',
+          borderRadius: '8px',
+          maxWidth: '400px',
+          margin: '0 auto 20px',
+          fontWeight: '600'
+        }}>
+          {message}
+        </div>
+      )}
       <div className="quizzes-container">
         {quizzes.length > 0 ? (
           quizzes.map((quiz) => (
@@ -108,6 +143,11 @@ const UserPage = () => {
             >
               <h3>{quiz.quizName}</h3>
               <p>Category: {quiz.categories.map((cat) => cat.name).join(', ')}</p>
+              {quiz.startDate && (
+                <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                  <b>Scheduled:</b> {quiz.startDate} at {quiz.startTime || 'N/A'}
+                </p>
+              )}
               <p>Time: {quiz.totalTime} minutes</p>
               <button className="start-button">Start</button>
             </div>

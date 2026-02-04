@@ -1,61 +1,42 @@
+/* Modern QuizTimer Styles */
 .quiz-timer {
   text-align: right;
-  font-size: 1.6rem;
-  color: #f9f6f6;
-  margin-bottom: 20px;
-  background: linear-gradient(90deg, #3c26bd, #3b1d5a);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  background: #f1f5f9;
   width: max-content;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 10px;
   margin-left: auto;
-  /* Push to the right */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Add a subtle "pulse" if time is low (e.g., < 1 minute) */
+.quiz-timer.low-time {
+  color: #ef4444;
+  background: #fef2f2;
+  border-color: #fee2e2;
+  animation: timerPulse 1s infinite alternate;
+}
+
+@keyframes timerPulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 768px) {
   .quiz-timer {
-    margin: 0 auto 20px;
-    font-size: 1.3rem;
-    text-align: center;
+    font-size: 1.1rem;
+    padding: 6px 12px;
   }
-}
-
-/* Navigation Buttons */
-.quiz-navigation {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.quiz-button {
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.quiz-button:hover {
-  background-color: #1565c0;
-}
-
-.quiz-button:disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
-}
-
-/* Completion Message */
-.quiz-completed-message {
-  text-align: center;
-  background: #e3f2fd;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-
-}
-
-.quiz-completed-message h3 {
-
-  color: green;
 }

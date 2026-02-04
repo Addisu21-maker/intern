@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/pagesStyle/Home.css';
-import quizPage from '../pages/quizPage.jsx';
 
 export default function Home() {
   return (
@@ -21,8 +20,6 @@ export default function Home() {
           <p>Ready to take the quiz  up on  your knowledge? Let’s begin!</p>
         </div>
       </div>
-
-      <quizPage />
     </>
   );
 }

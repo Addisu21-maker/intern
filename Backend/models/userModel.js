@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  sex: {
+    type: String,
+    enum: ['Male', 'Female'],
+    default: 'Male',
+  },
 });
 
 const User = mongoose.model('User', userSchema);

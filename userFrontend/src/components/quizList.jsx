@@ -26,10 +26,21 @@ const QuizList = () => {
       <h2>Available Quizzes</h2>
       <ul>
         {quizzes.map((quiz) => (
-          <li key={quiz.id}>
+          <li key={quiz.id} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
             <h3>{quiz.quizName}</h3>
+            {quiz.startDate && (
+              <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                <strong>Scheduled for:</strong> {quiz.startDate} at {quiz.startTime || 'N/A'}
+              </p>
+            )}
             <p>{quiz.questionText}</p>
-            <button onClick={() => navigate(`/quiz/${quiz.id}`)}>Start Quiz</button>
+            <button
+              className="start-quiz-btn"
+              onClick={() => navigate(`/quiz/${quiz.id || quiz._id}`)}
+              style={{ padding: '8px 16px', backgroundColor: '#3da5f5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Select Quiz
+            </button>
           </li>
         ))}
       </ul>

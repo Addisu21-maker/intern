@@ -9,7 +9,7 @@ export default function Header() {
 
   // Check login status on mount
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     setIsLoggedIn(!!token); // Update login state
   }, []);
 
@@ -18,7 +18,7 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // Clear token from localStorage
+    localStorage.removeItem('token'); // Clear token from localStorage
     setIsLoggedIn(false); // Update login state
     navigate('/login'); // Redirect to login page
   };
@@ -36,33 +36,46 @@ export default function Header() {
 
       {/* Navigation Links */}
       <div className={`links ${isMenuOpen ? 'open' : ''}`}>
+        {!localStorage.getItem('token') && (
+          <>
+            <div className="one-links">
+              <NavLink className="link" to="/" exact>
+                Home
+              </NavLink>
+            </div>
+            <div className="one-links">
+              <NavLink className="link" to="/about">
+                About
+              </NavLink>
+            </div>
+            <div className="one-links">
+              <NavLink className="link" to="/help">
+                Help
+              </NavLink>
+            </div>
+            <div className="one-links">
+              <NavLink className="link" to="/contact">
+                Contact
+              </NavLink>
+            </div>
+            <div className="one-links">
+              <NavLink className="link" to="/messages">
+                Messages
+              </NavLink>
+            </div>
+          </>
+        )}
         <div className="one-links">
-          <NavLink className="link" to="/" exact>
-            Home
-          </NavLink>
+          {localStorage.getItem('token') ? (
+            <button className="button1" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <NavLink className="link" to="/login">
+              Login
+            </NavLink>
+          )}
         </div>
-        <div className="one-links">
-          <NavLink className="link" to="/about">
-            About
-          </NavLink>
-        </div>
-        <div className="one-links">
-          <NavLink className="link" to="/help">
-            Help
-          </NavLink>
-        </div>
-        <div className="one-links">
-          <NavLink className="link" to="/contact">
-            Contact
-          </NavLink>
-        </div>
-        <div className="one-links">
-          <NavLink className="link" to="/messages">
-            Messages
-          </NavLink>
-        </div>
-
-
       </div>
     </div>
   );

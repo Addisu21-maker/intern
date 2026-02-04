@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/pagesStyle/quizCard.css';
 import QuizTimer from './QuizTimer.jsx';
@@ -7,6 +7,7 @@ import QuizTimer from './QuizTimer.jsx';
 const QuizCard = () => {
   const { state } = useLocation();
   const { questions, quizName, quizId, totalTime } = state || {};
+  const navigate = useNavigate();
 
   // Get userId from localStorage (MongoDB _id from login)
   const userId = localStorage.getItem('userId');
@@ -54,10 +55,28 @@ const QuizCard = () => {
     }
   }, [quizDuration, quizCompleted]);
 
+  // Check if user has already taken this quiz
+  useEffect(() => {
+    const checkExistingResult = async () => {
+      try {
+        const res = await axios.get(`http://localhost:4000/api/user/${userId}/results`);
+        const alreadyTaken = res.data.some(r => (r.quizId?._id || r.quizId) === quizId);
+        if (alreadyTaken) {
+          setQuizCompleted(true);
+        }
+      } catch (err) {
+        console.error('Error checking existing results:', err);
+      }
+    };
+
+    if (userId && quizId) {
+      checkExistingResult();
+    }
+  }, [userId, quizId, navigate]);
+
   const handleTimeUp = () => {
     setQuizCompleted(true);
-    alert('Time is up! Your quiz is being submitted.');
-    handleSubmit();
+    handleSubmit(true); // pass true to indicate auto-submit
   };
 
   // Handle option selection
@@ -85,14 +104,15 @@ const QuizCard = () => {
   };
 
   // Submit quiz
-  const handleSubmit = async () => {
+  const handleSubmit = async (isAuto = false) => {
     if (!userId) {
       alert('You must be logged in to submit the quiz.');
       return;
     }
 
     const score = calculateScore();
-    const timeTaken = ((initialTime - quizDuration) / 60).toFixed(2); // minutes
+    const timeElapsedInSeconds = initialTime - quizDuration; // Time spent on quiz
+    const timeTaken = (timeElapsedInSeconds / 60).toFixed(2); // Convert to minutes
     console.log('Submitting quiz:', {
       userId,
       answers,
@@ -109,7 +129,6 @@ const QuizCard = () => {
 
       localStorage.removeItem(timerKey);
       setQuizCompleted(true); // mark completed AFTER successful submission
-      alert(`Quiz submitted! Your score: ${score} / ${questions.length}`);
     } catch (error) {
       console.error('Error submitting quiz:', error.response || error);
       alert('Failed to submit quiz. Make sure you are logged in.');
@@ -131,9 +150,10 @@ const QuizCard = () => {
 
       {quizCompleted ? (
         <div className="quiz-completed-message">
-          <h3>Thank you for completing the quiz!</h3>
-          <p>You answered {Object.keys(answers).length} out of {questions.length} questions.</p>
-          <p>Your score: {calculateScore()} out of {questions.length}.</p>
+          <h3>Thank you, you got {calculateScore()} out of {questions.length}</h3>
+          <button className="quiz-button" onClick={() => navigate('/quizPage')}>
+            Back to Dashboard
+          </button>
         </div>
       ) : (
         <>

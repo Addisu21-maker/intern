@@ -10,7 +10,7 @@
 
 .result-page h2 {
     text-align: center;
-    color: #2d0fc3;
+    color: #3da5f5;
     margin-bottom: 30px;
     margin-top: 0;
 }
@@ -52,7 +52,7 @@ td {
 }
 
 th {
-    background-color: #2d0fc3;
+    background-color: #3da5f5;
     color: white;
     font-weight: 600;
 }

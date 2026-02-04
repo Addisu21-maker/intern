@@ -27,11 +27,20 @@ const BulkUserModal = ({ setShowModal, fetchUsers }) => {
             }
 
             // Ensure userId is present, generate if missing
-            if (!obj.userid) {
+            if (!obj.userid && !obj.userId) {
                 obj.userId = 'user_' + Math.random().toString(36).substr(2, 9);
-            } else {
+            } else if (obj.userid) {
                 obj.userId = obj.userid;
                 delete obj.userid;
+            }
+
+            // Map gender/sex to sex
+            if (obj.gender) {
+                obj.sex = obj.gender;
+                delete obj.gender;
+            }
+            if (!obj.sex) {
+                obj.sex = 'Male';
             }
 
             result.push(obj);
@@ -92,7 +101,7 @@ const BulkUserModal = ({ setShowModal, fetchUsers }) => {
             <div className="modal-content">
                 <h3>Bulk User Import</h3>
                 <p style={{ fontSize: '0.9rem', marginBottom: '15px' }}>
-                    Upload a CSV file with headers: <b>name, email, role</b> (optional: <b>userid</b>)
+                    Upload a CSV file with headers: <b>userId, name, email, sex, role</b>.
                 </p>
 
                 <div className="input-group">

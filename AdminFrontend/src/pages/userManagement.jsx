@@ -62,6 +62,24 @@ const UserManagement = () => {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (!window.confirm('Are you sure you want to delete ALL users? (Admins will be protected). This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/api/users/delete-all', { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete all students');
+
+      const data = await response.json();
+      alert(data.message);
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting all users:', error);
+      alert('Failed to delete all users.');
+    }
+  };
+
   // Handle user editing
   const handleEdit = (user) => {
     setSelectedUser(user); // Set the selected user to be edited
@@ -85,6 +103,9 @@ const UserManagement = () => {
           <button className="add-user-btn" style={{ backgroundColor: '#3da5f5' }} onClick={() => setShowBulkModal(true)}>
             Bulk Import
           </button>
+          <button className="add-user-btn" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteAll}>
+            Delete All Users
+          </button>
         </div>
       </div>
 
@@ -106,6 +127,7 @@ const UserManagement = () => {
             <th>User ID</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Sex</th>
             <th>Password</th>
             <th>Role</th>
             <th>Actions</th>
@@ -118,6 +140,7 @@ const UserManagement = () => {
                 <td>{user.userId}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
+                <td>{user.sex || 'Other'}</td>
                 <td>{user.password}</td>
                 <td>{user.role}</td>
                 <td>

@@ -8,6 +8,7 @@ const AddUserModal = ({ setShowModal, fetchUsers }) => {
     name: '',
     email: '',
     role: 'user',
+    sex: 'Male',
     score: 0 // Default score
   });
 
@@ -81,6 +82,18 @@ const AddUserModal = ({ setShowModal, fetchUsers }) => {
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div className="input-group">
+            <label htmlFor="sex">Sex</label>
+            <select
+              id="sex"
+              name="sex"
+              value={userData.sex}
+              onChange={handleChange}
+            >
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
             </select>
           </div>
           <div className="input-group">

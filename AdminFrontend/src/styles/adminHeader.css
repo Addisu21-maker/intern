@@ -3,15 +3,16 @@
   top: 0;
   left: 0;
   width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(135deg, #201928 0%, #3da5f5 100%);
   color: white;
-  padding: 1rem 2rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
   box-shadow: none;
-  height: 50px;
+  height: 70px;
 }
 
 .admin-header .logo {
@@ -36,19 +37,20 @@
 }
 
 .logout-header-btn {
-  background-color: #3da5f5;
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
-  border: none;
-  padding: 8px 16px;
+  border: 1px solid white;
+  padding: 8px 20px;
   border-radius: 5px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
 }
 
 .logout-header-btn:hover {
-  background-color: #2b94e4;
+  background-color: white;
+  color: #3da5f5;
 }
 
 @media (max-width: 768px) {
