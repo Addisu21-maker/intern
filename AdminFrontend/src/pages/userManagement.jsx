@@ -3,12 +3,14 @@ import '../styles/userManagement.css';
 import { FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
 import AddUserModal from '../components/AddUserModal';
 import EditUserModal from '../components/EditUserModal';
+import BulkUserModal from '../components/BulkUserModal';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null); // Store the user being edited
   const [isAddingUser, setIsAddingUser] = useState(false); // Track whether we are adding a user
 
@@ -43,14 +45,14 @@ const UserManagement = () => {
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`http://localhost:4000/api/users/delete-user/${id}`, { method: 'DELETE' });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error deleting user:', errorData.message || 'Unknown error');
         alert('Failed to delete user. Please try again.');
         return;
       }
-  
+
       const data = await response.json(); // Handle the response data
       setUsers(users.filter(user => user._id !== id)); // Remove deleted user from the UI
       alert('User deleted successfully');
@@ -58,7 +60,7 @@ const UserManagement = () => {
       console.error('Error deleting user:', error);
       alert('An error occurred while deleting the user. Please try again later.');
     }
-  };  
+  };
 
   // Handle user editing
   const handleEdit = (user) => {
@@ -76,9 +78,14 @@ const UserManagement = () => {
     <div className="user-management-container">
       <div className="header">
         <h2>User Management</h2>
-        <button className="add-user-btn" onClick={handleAddUser}>
-          + Add User
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="add-user-btn" onClick={handleAddUser}>
+            + Add User
+          </button>
+          <button className="add-user-btn" style={{ backgroundColor: '#3da5f5' }} onClick={() => setShowBulkModal(true)}>
+            Bulk Import
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -96,8 +103,10 @@ const UserManagement = () => {
       <table className="user-table">
         <thead>
           <tr>
+            <th>User ID</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Password</th>
             <th>Role</th>
             <th>Actions</th>
           </tr>
@@ -106,8 +115,10 @@ const UserManagement = () => {
           {filteredUsers.length > 0 ? (
             filteredUsers.map(user => (
               <tr key={user._id}>
+                <td>{user.userId}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
+                <td>{user.password}</td>
                 <td>{user.role}</td>
                 <td>
                   <button onClick={() => handleEdit(user)} className="edit-btn">
@@ -121,7 +132,7 @@ const UserManagement = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="4">No users found</td>
+              <td colSpan="6">No users found</td>
             </tr>
           )}
         </tbody>
@@ -129,21 +140,29 @@ const UserManagement = () => {
 
       {/* Add User Modal */}
       {showModal && (
-        <AddUserModal 
-          setShowModal={setShowModal} 
-          fetchUsers={fetchUsers} 
+        <AddUserModal
+          setShowModal={setShowModal}
+          fetchUsers={fetchUsers}
           isAddingUser={isAddingUser} // Pass the flag for Add User
           setIsAddingUser={setIsAddingUser} // Reset the flag after closing modal
         />
       )}
-      
+
 
       {/* Edit User Modal */}
       {showModal && selectedUser && !isAddingUser && (
-        <EditUserModal 
-          user={selectedUser} 
-          setShowModal={setShowModal} 
-          fetchUsers={fetchUsers} 
+        <EditUserModal
+          user={selectedUser}
+          setShowModal={setShowModal}
+          fetchUsers={fetchUsers}
+        />
+      )}
+
+      {/* Bulk Import Modal */}
+      {showBulkModal && (
+        <BulkUserModal
+          setShowModal={setShowBulkModal}
+          fetchUsers={fetchUsers}
         />
       )}
     </div>

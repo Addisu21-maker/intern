@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/pagesStyle/contact.css';
-// import axios from 'axios';
+import axios from 'axios';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -37,9 +37,9 @@ const ContactPage = () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await axios.post('http://localhost:5000/api/contact/submit', formData); // Corrected URL
-        
-        if (response.status === 200) {
+        const response = await axios.post('http://localhost:4000/api/contact/submit', formData); // Corrected URL
+
+        if (response.status === 200 || response.status === 201) {
           setSuccessMessage('Your message has been sent successfully!');
           setFormData({
             name: '',
@@ -99,9 +99,9 @@ const ContactPage = () => {
         <button type="submit" className="submit-button">Send Message</button>
         {successMessage && <p className="success">{successMessage}</p>}
       </form>
-      
+
     </div>
-    
+
   );
 };
 

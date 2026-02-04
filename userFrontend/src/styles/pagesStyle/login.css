@@ -10,7 +10,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-min-height: 100vh;
+  min-height: 100vh;
   background-color: #e3eaf2;
   padding-bottom: 50px;
 }
@@ -68,7 +68,7 @@ min-height: 100vh;
 .login-btn {
   width: 100%;
   padding: 10px;
-  background-color: rgb(56, 56, 232);
+  background-color: #3da5f5;
   border: none;
   border-radius: 5px;
   color: #ffffff;
@@ -78,7 +78,7 @@ min-height: 100vh;
 }
 
 .login-btn:hover {
-  background-color: #0056b3;
+  background-color: #2b94e4;
 }
 
 /* Vertical Line */
@@ -108,12 +108,18 @@ min-height: 100vh;
   color: #555555;
   line-height: 1.6;
 }
+
 @media (max-width: 768px) {
   .login-container {
     flex-direction: column;
-    height: 90vh;
+    height: auto;
     margin-top: 30px;
-    width: 500px;
+    width: 95%;
+    max-width: 500px;
+  }
+
+  .form-group label {
+    width: 100%;
   }
 
   .login-form,

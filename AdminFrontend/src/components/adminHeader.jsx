@@ -5,24 +5,22 @@ import "../styles/adminHeader.css";
 const AdminHeader = ({ toggleSidebar }) => {
   const navigate = useNavigate();
 
-  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     sessionStorage.removeItem("authToken");
-    navigate("/logging"); // lowercase route
+    navigate("/logging");
   };
-
 
   return (
     <header className="admin-header">
       <div className="logo" onClick={() => navigate("/dashboard")}>
         Quiz Admin
       </div>
-      <nav className="nav-links">
-        <button id="logout" className="logout-btn" onClick={handleLogout}>
+      <div className="header-actions">
+        <button className="logout-header-btn" onClick={handleLogout}>
           Logout
         </button>
-      </nav>
+      </div>
     </header>
   );
 };

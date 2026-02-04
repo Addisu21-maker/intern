@@ -1,18 +1,23 @@
 /* Ensure html and body take full height and allow scrolling */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: auto; /* Allow content overflow if necessary */
+  overflow: auto;
+  /* Allow content overflow if necessary */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .question-management {
   padding: 20px;
-  min-height: 100vh; /* Ensure it adapts to content height */
+  min-height: 100vh;
+  /* Ensure it adapts to content height */
   box-sizing: border-box;
-  background-color: #f4f7fc; /* Soft background color for the page */
-  color: #333; /* Text color */
+  background-color: #f4f7fc;
+  /* Soft background color for the page */
+  color: #333;
+  /* Text color */
 }
 
 h2 {
@@ -51,7 +56,7 @@ h2 {
 
 .add-question button {
   padding: 12px 20px;
-  background-color: #4a90e2;
+  background-color: #3da5f5;
   color: white;
   border: none;
   border-radius: 8px;
@@ -64,7 +69,7 @@ h2 {
 }
 
 .add-question button:hover {
-  background-color: #357abd;
+  background-color: #2b94e4;
 }
 
 .add-question button:disabled {
@@ -72,11 +77,11 @@ h2 {
   cursor: not-allowed;
 }
 
-.add-question button + button {
+.add-question button+button {
   background-color: #e74c3c;
 }
 
-.add-question button + button:hover {
+.add-question button+button:hover {
   background-color: #c0392b;
 }
 
@@ -125,10 +130,11 @@ h2 {
   color: #357abd;
 }
 
-.quizName{
+.quizName {
   color: black;
   /* background-color: red; */
 }
+
 .question-list .action-buttons {
   display: flex;
   justify-content: center;
@@ -136,6 +142,7 @@ h2 {
 }
 
 @media (max-width: 768px) {
+
   .select-quiz,
   .add-question {
     width: 100%;

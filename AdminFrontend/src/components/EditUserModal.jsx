@@ -4,6 +4,8 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
+  const [userId, setUserId] = useState(user.userId);
+  const [score, setScore] = useState(user.score);
 
   const [password, setPassword] = useState('');
 
@@ -15,7 +17,7 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, role }),
+        body: JSON.stringify({ name, email, role, userId, score }),
       });
 
       if (!response.ok) {
@@ -51,6 +53,12 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
     <div className="modal">
       <div className="modal-content">
         <h3>Edit User</h3>
+        <label>User ID</label>
+        <input
+          type="text"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+        />
         <label>Name</label>
         <input
           type="text"
@@ -68,6 +76,12 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
           type="text"
           value={role}
           onChange={(e) => setRole(e.target.value)}
+        />
+        <label>Score</label>
+        <input
+          type="number"
+          value={score}
+          onChange={(e) => setScore(e.target.value)}
         />
         <label>One-Time Password Change (Optional)</label>
         <input

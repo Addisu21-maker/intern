@@ -14,6 +14,7 @@ import FooterPage from './components/Footer.jsx';
 import QuizList from './components/quizList';
 import QuizCard from './components/quizCard';
 import ResultCard from './components/resultCard';
+import UserMessages from './pages/UserMessages';
 
 const App = () => {
   const location = useLocation();
@@ -51,6 +52,7 @@ const App = () => {
         <Route path="/help" element={<Help />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/messages" element={<UserMessages />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>

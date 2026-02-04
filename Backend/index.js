@@ -13,6 +13,7 @@ import sinupRoute from './routes/sinupRoute.js';
 import adminAuthRoutes from './routes/adminAuthRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import quizResultRoutes from './routes/quizResultRoutes.js'
+import contactRoutes from './routes/contactRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +27,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 4000; 
+const PORT = process.env.PORT || 4000;
 const MONGO_URL = process.env.MONGODB_URI;
 
 if (!MONGO_URL) {
@@ -80,6 +81,7 @@ app.use('/api', loginRoute); // User login route at /api/users/login
 app.use('/api', adminAuthRoutes); // Admin auth routes at /api/register and /api/login
 app.use('/api', dashboardRoutes)
 app.use('/api', quizResultRoutes)
+app.use('/api/contact', contactRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);

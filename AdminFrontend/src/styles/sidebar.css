@@ -1,54 +1,41 @@
 .sidebar {
-    width: 230px;
-    height: 100vh;
-    background: linear-gradient(135deg, #1e1a22 0%, #7c8daa 100%);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    transition: width 0.3s ease;
-    margin-top: 80px;
-  }
-  
-  
-  
-  .sidebar .toggle-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    margin: 10px;
-  }
-  
-  .sidebar nav {
-    margin-top: 20px;
-  }
-  
-  .sidebar nav a {
-    display: block;
-    color: white;
-    text-decoration: none;
-    font-size: 1.2rem;
-    padding: 15px 20px;
-    transition: background 0.3s;
-    font-family: sans-serif;
-  }
-  
-  .sidebar nav a:hover {
-    background-color: #9255d3;
-  }
-  /* Basic Sidebar Styles */
-.sidebar {
-  width: 200px;
-  transition: width 0.3s;
-  background-color: #333;
+  width: 230px;
+  height: 100vh;
+  background: linear-gradient(135deg, #1e1a22 0%, #3da5f5 100%);
   color: white;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  transition: width 0.3s ease;
+  margin-top: 80px;
+  box-shadow: none;
+  /* No shadow */
+  border-right: none;
 }
 
 .sidebar.closed {
-  width: 80px; /* Smaller width when closed */
+  width: 80px;
+}
+
+.sidebar nav {
+  margin-top: 20px;
+}
+
+.sidebar nav a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 15px 20px;
+  transition: background 0.3s, color 0.3s;
+  font-family: sans-serif;
+  box-shadow: none !important;
+}
+
+.sidebar nav a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #3da5f5;
+  box-shadow: none !important;
 }
 
 .sidebar .sidebar-icon {
@@ -62,12 +49,20 @@
 }
 
 @media (max-width: 768px) {
-  .sidebar .sidebar-text {
-    display: none; /* Hide text on small screens */
+  .sidebar {
+    margin-top: 70px;
+    height: calc(100vh - 70px);
   }
-  
-  .sidebar.open {
-    width: 60px; /* Smaller width on mobile */
+
+  .sidebar .sidebar-text {
+    display: none;
+    /* Hide text on small screens */
+  }
+
+  .sidebar.open,
+  .sidebar.closed {
+    width: 60px;
+    /* Consistently small on mobile */
   }
 
   /* Show only icons in mobile view */
@@ -75,4 +70,29 @@
     margin-right: 0;
     font-size: 1.5em;
   }
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-sidebar-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-family: sans-serif;
+  border-radius: 5px;
+}
+
+.logout-sidebar-btn:hover {
+  background-color: #e74c3c;
 }

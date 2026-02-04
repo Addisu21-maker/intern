@@ -83,18 +83,24 @@ ul li {
 /* Responsive design */
 @media (max-width: 768px) {
   .help-container {
-      padding: 15px;
+    padding: 15px;
   }
 
   .help-heading {
-      font-size: 28px;
+    font-size: 28px;
   }
 
   .section h2 {
-      font-size: 20px;
+    font-size: 20px;
   }
 
-  .text, ul li {
-      font-size: 16px;
+  .text,
+  ul li {
+    font-size: 16px;
+  }
+
+  .help-container {
+    margin-top: 80px;
+    width: 95%;
   }
 }

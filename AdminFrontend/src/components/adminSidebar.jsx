@@ -1,15 +1,23 @@
 import React, { useState } from "react";
-import { FaHome, FaClipboardList, FaQuestionCircle, FaUsers, FaThList, FaChartLine } from "react-icons/fa";  // Importing icons
+import { useNavigate } from "react-router-dom";
+import { FaClipboardList, FaQuestionCircle, FaUsers, FaThList, FaChartLine, FaEnvelope, FaTachometerAlt } from "react-icons/fa";  // Importing icons
 import "../styles/sidebar.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    sessionStorage.removeItem("authToken");
+    navigate("/logging");
+  };
 
   return (
     <aside className={`sidebar ${isOpen ? "open" : "closed"}`}>
       <nav>
         <a href="dashboard">
-          <FaHome className="sidebar-icon" />
+          <FaTachometerAlt className="sidebar-icon" />
           <span className="sidebar-text">Dashboard</span>
         </a>
         <a href="quiz-management">
@@ -31,6 +39,10 @@ const Sidebar = () => {
         <a href="reports">
           <FaChartLine className="sidebar-icon" />
           <span className="sidebar-text">Reports</span>
+        </a>
+        <a href="messages">
+          <FaEnvelope className="sidebar-icon" />
+          <span className="sidebar-text">Messages</span>
         </a>
       </nav>
     </aside>

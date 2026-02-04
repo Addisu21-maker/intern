@@ -39,6 +39,37 @@ router.post('/add-user', async (req, res) => {
   }
 });
 
+// Bulk add users
+router.post('/bulk-add-users', async (req, res) => {
+  const users = req.body; // Expecting an array of user objects
+
+  if (!Array.isArray(users) || users.length === 0) {
+    return res.status(400).json({ message: 'Invalid data format. Expected an array of users.' });
+  }
+
+  const defaultPassword = "qwe123";
+
+  const usersToInsert = users.map(user => ({
+    ...user,
+    password: defaultPassword,
+    score: user.score || 0
+  }));
+
+  try {
+    const result = await User.insertMany(usersToInsert, { ordered: false });
+    res.status(201).json({ message: `${result.length} users registered successfully`, count: result.length });
+  } catch (error) {
+    console.error('Error during bulk insertion:', error);
+    // If some succeeded and some failed (e.g. duplicates), Mongoose throws an error but result might still contain successes if {ordered: false}
+    const insertedCount = error.insertedDocs ? error.insertedDocs.length : 0;
+    res.status(500).json({
+      message: 'Some users could not be registered (possibly duplicates).',
+      insertedCount,
+      error: error.writeErrors ? error.writeErrors.map(e => e.errmsg) : error.message
+    });
+  }
+});
+
 // Get all users
 router.get('/users', async (req, res) => {
   try {
@@ -66,14 +97,14 @@ router.delete('/users/delete-user/:id', async (req, res) => {
 
 // Edit user by ID (newly added)
 router.put('/users/edit-user/:id', async (req, res) => {
-  const userId = req.params.id;
-  const { name, email, role } = req.body; // Get updated details from the request body
+  const userId = req.params.id; // This is the _id in MongoDB
+  const { name, email, role, userId: newUserId, score } = req.body; // Get updated details from the request body
 
   try {
     // Find the user by ID and update their information
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { name, email, role }, // Update these fields
+      { name, email, role, userId: newUserId, score }, // Update these fields
       { new: true } // This ensures the updated document is returned
     );
 

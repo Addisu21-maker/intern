@@ -7,6 +7,7 @@ import CatagoryManagement from "./pages/categoryManagement.jsx";
 import AdminProfile from './pages/profile.jsx'
 import QuestionManagement from "./pages/QuestionManagement.jsx";
 import Reports from "./pages/Reports";
+import ContactMessages from "./pages/ContactMessages";
 import AdminHeader from "./components/adminHeader";
 import Sidebar from "./components/adminSidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -20,7 +21,7 @@ import Signup from "./pages/signup.jsx";
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/' || location.pathname === '/logging' || location.pathname === '/signup';
-  
+
   // Check if user is authenticated
   const isAuthenticated = () => {
     const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
@@ -58,61 +59,69 @@ const App = () => {
       <Routes>
         <Route path="/logging" element={<LoginPage />} />
         <Route path="/signup" element={<Signup />} />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/quiz-management" 
+        <Route
+          path="/quiz-management"
           element={
             <ProtectedRoute>
               <QuizManagement />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/question-management" 
+        <Route
+          path="/question-management"
           element={
             <ProtectedRoute>
               <QuestionManagement />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/user-management" 
+        <Route
+          path="/user-management"
           element={
             <ProtectedRoute>
               <UserManagement />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/catagory-management" 
+        <Route
+          path="/catagory-management"
           element={
             <ProtectedRoute>
               <CatagoryManagement />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/reports" 
+        <Route
+          path="/reports"
           element={
             <ProtectedRoute>
               <Reports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/profile" 
+        <Route
+          path="/profile"
           element={
             <ProtectedRoute>
               <AdminProfile />
             </ProtectedRoute>
-          } 
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <ContactMessages />
+            </ProtectedRoute>
+          }
         />
         {/* Default redirect to dashboard if authenticated, otherwise to login */}
         <Route path="/" element={<LoginPage />} />

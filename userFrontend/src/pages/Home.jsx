@@ -1,10 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/pagesStyle/Home.css';
-import About from '../pages/About.jsx';
-import Contact from '../pages/Contact.jsx';
-import FooterPage from '../components/Footer'
-
 import quizPage from '../pages/quizPage.jsx';
 
 export default function Home() {
@@ -26,8 +22,6 @@ export default function Home() {
         </div>
       </div>
 
-      <About />
-      <Contact />
       <quizPage />
     </>
   );

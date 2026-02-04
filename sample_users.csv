@@ -1,0 +1,11 @@
+name,email,role,userId
+Alice Johnson,alice@example.com,user,user_001
+Bob Smith,bob@example.com,user,user_002
+Charlie Davis,charlie@example.com,user,user_003
+Diana Prince,diana@example.com,admin,admin_001
+Edward Norton,edward@example.com,user,user_004
+Fiona Apple,fiona@example.com,user,user_005
+George Clooney,george@example.com,user,user_006
+Hannah Montana,hannah@example.com,user,user_007
+Ian McKellen,ian@example.com,user,user_008
+Jane Doe,jane@example.com,user,user_009
