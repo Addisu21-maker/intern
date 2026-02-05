@@ -11,7 +11,6 @@ const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Get user info from localStorage (stored during login "user": {"email": ...})
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
@@ -21,7 +20,39 @@ const AdminProfile = () => {
         console.error("Error parsing user from local storage", e);
       }
     }
+    fetchAdminInfo();
   }, []);
+
+  const fetchAdminInfo = async () => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    try {
+      const response = await fetch(`http://localhost:4000/api/user/signups`);
+      const data = await response.json();
+      const currentAdmin = data.find(u => u.email === user.email);
+      if (currentAdmin) {
+        setAdminName(currentAdmin.name || '');
+      }
+    } catch (err) {
+      console.error("Error fetching admin info", err);
+    }
+  };
+
+  const [adminName, setAdminName] = useState('');
+
+  const handleNameUpdate = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/api/admin/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: adminEmail, name: adminName })
+      });
+      if (response.ok) alert("Name updated successfully!");
+    } catch (err) {
+      alert("Failed to update name");
+    }
+  };
 
   const handleChange = (e) => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
@@ -49,7 +80,7 @@ const AdminProfile = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:4000/api/admin/change-password', {
+      const response = await fetch('http://localhost:4000/api/change-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -82,6 +113,16 @@ const AdminProfile = () => {
       <h2>Admin Profile</h2>
       <div className="profile-card">
         <div className="info-group">
+          <label><strong>Name</strong></label>
+          <input
+            type="text"
+            value={adminName}
+            onChange={(e) => setAdminName(e.target.value)}
+            style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+          />
+          <button onClick={handleNameUpdate} className="update-btn" style={{ fontSize: '14px', padding: '5px 15px', width: 'auto' }}>Update Name</button>
+        </div>
+        <div className="info-group" style={{ marginTop: '20px' }}>
           <strong>Email:</strong> {adminEmail || 'Loading...'}
         </div>
 

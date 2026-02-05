@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/pagesStyle/login.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 const LoginPage = () => {
@@ -33,6 +33,9 @@ const LoginPage = () => {
         localStorage.setItem('token', user._id);   // optional
         localStorage.setItem('name', user.name);
 
+        // Notify other components (Header) that login state changed
+        window.dispatchEvent(new Event('storage'));
+
         alert('Login successful!');
         navigate('/exams');  // redirect
       } else {
@@ -53,7 +56,7 @@ const LoginPage = () => {
           <h2>Login</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="username">User ID</label>
+              <label htmlFor="username">User ID or Email</label>
               <input
                 type="text"
                 id="username"
@@ -76,6 +79,12 @@ const LoginPage = () => {
             </div>
             <button type="submit" className="login-btn">Login</button>
           </form>
+          <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
+            Forgot password? Please <Link to="/contact">Contact Administrator</Link>.
+          </p>
+          <p style={{ marginTop: '10px' }}>
+            Don't have an account? <Link to="/signup">Sign up here</Link>
+          </p>
         </div>
         <div className="vertical-line"></div>
         <div className="description">

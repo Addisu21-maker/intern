@@ -9,11 +9,12 @@ const JWT_SECRET = 'hailemeskelMierafLidia122116';
 
 // Admin signup route
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { name, password, sex } = req.body;
+    const email = req.body.email ? req.body.email.toLowerCase() : '';
 
     try {
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required.' });
+        if (!name || !email || !password || !sex) {
+            return res.status(400).json({ message: 'Name, Email, Password and Sex are required.' });
         }
 
         const existingUser = await SignUp.findOne({ email });
@@ -21,7 +22,7 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists.' });
         }
 
-        const user = new SignUp({ email, password, role: 'admin' });
+        const user = new SignUp({ name, email, password, sex, role: 'admin' });
         await user.save();
 
         return res.status(201).json({ message: 'Admin registered successfully!' });
@@ -31,38 +32,100 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Explicit Add Admin route (from dashboard)
+router.post('/add-admin', async (req, res) => {
+    const { name, password, sex } = req.body;
+    const email = req.body.email ? req.body.email.toLowerCase() : '';
+
+    try {
+        if (!name || !email || !password || !sex) {
+            return res.status(400).json({ message: 'Name, Email, Password and Sex are required.' });
+        }
+
+        const existingInSignUp = await SignUp.findOne({ email });
+        const existingInUser = await User.findOne({ email });
+
+        if (existingInUser) {
+            return res.status(400).json({ message: 'Admin with this email already exists.' });
+        }
+
+        // 1. Add/Update SignUp (Record keeping)
+        if (!existingInSignUp) {
+            const signupAdmin = new SignUp({ name, email, password, sex, role: 'admin' });
+            await signupAdmin.save();
+        }
+
+        // 2. Add to User (Active/Approved)
+        const activeAdmin = new User({
+            userId: 'ADM' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+            name,
+            email,
+            password,
+            sex,
+            role: 'admin'
+        });
+        await activeAdmin.save();
+
+        res.status(201).json({ message: 'Admin added and approved successfully!' });
+    } catch (err) {
+        console.error("Add Admin Error:", err);
+        res.status(500).json({ message: 'Error adding admin.' });
+    }
+});
+
 // Admin login route
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = req.body.email ? req.body.email.toLowerCase() : '';
 
     try {
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required.' });
         }
 
-        // 1. Check in the SignUp collection (Traditional Admin)
-        let admin = await SignUp.findOne({ email });
-        let isPasswordValid = false;
-        let userData = null;
+        const SUPER_ADMIN_EMAIL = 'admin@gmail.com';
 
-        if (admin) {
-            isPasswordValid = await admin.comparePassword(password);
-            if (isPasswordValid) {
-                userData = { email: admin.email, role: admin.role, id: admin._id };
+        // 1. Check in the SignUp collection (Temporary record for approval)
+        let signupRecord = await SignUp.findOne({ email });
+
+        // 2. Check in the User collection (Active/Approved Admins)
+        let activeAdmin = await User.findOne({ email, role: 'admin' });
+
+        const isSuperAdmin = (email === SUPER_ADMIN_EMAIL);
+
+        // Approval Logic
+        if (!activeAdmin) {
+            if (isSuperAdmin && signupRecord) {
+                // Allow Super Admin even if not "Added" successfully to the User collection yet
+            } else if (signupRecord) {
+                // Standard admin signed up but Super Admin hasn't added them to the active list yet
+                return res.status(403).json({ message: 'Access denied. Please wait for Super Admin approval.' });
+            } else {
+                // Not found at all or not approved
+                return res.status(401).json({ message: 'Access denied or invalid credentials.' });
             }
         }
 
-        // 2. If not found or invalid in SignUp, check in the User collection (Created via User Management)
-        if (!userData) {
-            const user = await User.findOne({ email, role: 'admin' });
-            if (user && user.password === password) {
-                isPasswordValid = true;
-                userData = { email: user.email, role: user.role, id: user._id };
+        let userData = null;
+        let isPasswordValid = false;
+
+        if (activeAdmin) {
+            // Check the active record (hashing is via bcrypt in pre-save)
+            isPasswordValid = await bcrypt.compare(password, activeAdmin.password);
+            if (isPasswordValid) {
+                userData = { email: activeAdmin.email, role: 'admin', id: activeAdmin._id };
+            }
+        } else if (isSuperAdmin && signupRecord) {
+            // Bootstrap case for Super Admin
+            isPasswordValid = await signupRecord.comparePassword(password);
+            if (isPasswordValid) {
+                userData = { email: signupRecord.email, role: 'admin', id: signupRecord._id };
             }
         }
 
         if (!userData || !isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid credentials or not an admin.' });
+            console.log(`Failed login attempt for: ${email}`);
+            return res.status(401).json({ message: 'Invalid credentials or access denied.' });
         }
 
         // Generate a JWT
@@ -72,6 +135,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        console.log(`Success: Admin ${email} logged in.`);
         return res.status(200).json({
             token,
             message: 'Login successful!',
@@ -81,7 +145,7 @@ router.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Admin login error:', error);
+        console.error('CRITICAL: Admin login error:', error);
         return res.status(500).json({ message: 'Server error. Please try again.' });
     }
 });
@@ -112,6 +176,30 @@ router.put('/change-password', async (req, res) => {
 
     } catch (error) {
         console.error('Change password error:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+// Admin update profile (name)
+router.put('/admin/update-profile', async (req, res) => {
+    const { email, name } = req.body;
+
+    try {
+        if (!email || !name) {
+            return res.status(400).json({ message: 'Email and name are required.' });
+        }
+
+        const user = await SignUp.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'Admin not found.' });
+        }
+
+        user.name = name;
+        await user.save();
+
+        res.status(200).json({ message: 'Profile updated successfully.' });
+    } catch (error) {
+        console.error('Update profile error:', error);
         res.status(500).json({ message: 'Server error.' });
     }
 });

@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from '../models/userModel.js';
+import SignUp from '../models/logModel.js';
 import { sendEmail } from '../utils/emailService.js';
 const router = express.Router();
 import jwt from 'jsonwebtoken';
@@ -68,9 +69,17 @@ router.post('/bulk-add-users', async (req, res) => {
       if (existingUser) {
         skipped++;
       } else {
+        const plainPassword = userData.password || defaultPassword;
+        // Hash if not already hashed
+        let passwordToStore = plainPassword;
+        if (!plainPassword.startsWith('$2b$') && !plainPassword.startsWith('$2a$')) {
+          const salt = await bcrypt.genSalt(10);
+          passwordToStore = await bcrypt.hash(plainPassword, salt);
+        }
+
         usersToInsert.push({
           ...userData,
-          password: defaultPassword,
+          password: passwordToStore,
           score: userData.score || 0
         });
         newlyAdded++;
@@ -91,7 +100,7 @@ router.post('/bulk-add-users', async (req, res) => {
             sendEmail(
               user.email,
               'Welcome to Quiz App - Your Credentials',
-              `Hello ${user.name},\n\nYour account has been created successfully!\n\nUser ID: ${user.userId}\nPassword: ${defaultPassword}\n\nPlease log in at the portal.\n\nBest regards,\nAdmin Team`
+              `Hello ${user.name},\n\nYour account has been created successfully!\n\nUser ID: ${user.userId}\nPassword: (The password you signed up with)\n\nPlease log in at the portal.\n\nBest regards,\nAdmin Team`
             ).catch(err => console.error(`Failed to send email to ${user.email}:`, err))
           ));
 
@@ -160,13 +169,13 @@ router.delete('/users/delete-all', async (req, res) => {
 // Edit user by ID (newly added)
 router.put('/users/edit-user/:id', async (req, res) => {
   const userId = req.params.id; // This is the _id in MongoDB
-  const { name, email, role, userId: newUserId, score, sex } = req.body; // Get updated details from the request body
+  const updateData = req.body;
 
   try {
     // Find the user by ID and update their information
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { name, email, role, userId: newUserId, score, sex }, // Update these fields
+      { $set: updateData }, // Only update fields present in the request
       { new: true } // This ensures the updated document is returned
     );
 
@@ -189,15 +198,30 @@ router.post('/users/login', async (req, res) => {
   const { userId, password } = req.body;
 
   try {
-    // Find user by userId
-    const user = await User.findOne({ userId });
+    // Find user by userId OR email (allowing login with either)
+    const user = await User.findOne({
+      $or: [
+        { userId: userId },
+        { email: userId } // Assuming the frontend sends email/userId in the 'userId' field
+      ]
+    });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Check password (plain text)
-    if (password !== user.password) {
+    // Check password
+    let isMatch = false;
+
+    // If password starts with $2b$ or $2a$, it's likely a bcrypt hash
+    if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+      isMatch = await bcrypt.compare(password, user.password);
+    } else {
+      // Plain text comparison (legacy/default admin created)
+      isMatch = (password === user.password);
+    }
+
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid password.' });
     }
 
@@ -219,6 +243,7 @@ router.post('/users/login', async (req, res) => {
   }
 });
 
+
 // Change password
 router.put('/users/change-password/:id', async (req, res) => {
   const userId = req.params.id;
@@ -230,15 +255,32 @@ router.put('/users/change-password/:id', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Verify current password (plain text) if provided
-    if (currentPassword && user.password !== currentPassword) {
-      return res.status(400).json({ message: 'Invalid current password' });
+    // Verify current password
+    if (currentPassword) {
+      let isMatch = false;
+      if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+        isMatch = await bcrypt.compare(currentPassword, user.password);
+      } else {
+        isMatch = (currentPassword === user.password);
+      }
+
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid current password' });
+      }
     }
 
+    // 1. Update the Active User
     user.password = newPassword;
     await user.save();
 
-    res.status(200).json({ message: 'Password updated successfully' });
+    // 2. Sync with the SignUp collection (so re-imports use the new password)
+    await SignUp.findOneAndUpdate(
+      { email: user.email },
+      { password: newPassword }
+      // The logModel has its own pre-save hook to hash this!
+    );
+
+    res.status(200).json({ message: 'Password updated successfully across all records' });
   } catch (error) {
     console.error('Error updating password:', error);
     res.status(500).json({ message: 'Failed to update password' });

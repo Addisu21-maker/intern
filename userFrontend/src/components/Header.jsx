@@ -7,10 +7,18 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  // Check login status on mount
+  // Check login status on mount and listen for storage changes
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token); // Update login state
+    const checkLogin = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    };
+
+    checkLogin(); // Check on mount
+
+    // Listen for storage events (including manual dispatches)
+    window.addEventListener('storage', checkLogin);
+    return () => window.removeEventListener('storage', checkLogin);
   }, []);
 
   const toggleMenu = () => {
@@ -36,40 +44,59 @@ export default function Header() {
 
       {/* Navigation Links */}
       <div className={`links ${isMenuOpen ? 'open' : ''}`}>
-        {!localStorage.getItem('token') && (
+        <div className="one-links">
+          <NavLink className="link" to="/" exact>
+            Home
+          </NavLink>
+        </div>
+        <div className="one-links">
+          <NavLink className="link" to="/about">
+            About
+          </NavLink>
+        </div>
+
+        <div className="one-links">
+          <NavLink className="link" to="/help">
+            Help
+          </NavLink>
+        </div>
+
+        <div className="one-links">
+          <NavLink className="link" to="/contact">
+            Contact
+          </NavLink>
+        </div>
+
+        <div className="one-links">
+          <NavLink className="link" to="/messages">
+            Messages
+          </NavLink>
+        </div>
+
+        {isLoggedIn && (
           <>
             <div className="one-links">
-              <NavLink className="link" to="/" exact>
-                Home
+              <NavLink className="link" to="/exams">
+                Exams
               </NavLink>
             </div>
             <div className="one-links">
-              <NavLink className="link" to="/about">
-                About
-              </NavLink>
-            </div>
-            <div className="one-links">
-              <NavLink className="link" to="/help">
-                Help
-              </NavLink>
-            </div>
-            <div className="one-links">
-              <NavLink className="link" to="/contact">
-                Contact
-              </NavLink>
-            </div>
-            <div className="one-links">
-              <NavLink className="link" to="/messages">
-                Messages
+              <NavLink className="link" to="/profile">
+                Profile
               </NavLink>
             </div>
           </>
         )}
+
         <div className="one-links">
-          {localStorage.getItem('token') && (
+          {isLoggedIn ? (
             <button className="button1" onClick={handleLogout}>
               Logout
             </button>
+          ) : (
+            <NavLink className="link" to="/login">
+              Login
+            </NavLink>
           )}
         </div>
       </div>

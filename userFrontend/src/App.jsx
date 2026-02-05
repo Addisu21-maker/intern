@@ -13,6 +13,8 @@ import ExamList from './components/ExamList.jsx';
 import ExamCard from './components/ExamCard.jsx';
 import ResultCard from './components/resultCard.jsx';
 import UserMessages from './pages/UserMessages';
+import Signup from './pages/Signup';
+import Profile from './pages/Profile';
 
 const App = () => {
   return (
@@ -25,6 +27,8 @@ const App = () => {
         <Route path="/help" element={<Help />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/messages" element={<UserMessages />} />
         <Route path="/exams" element={<ExamPage />} />
         <Route path="/resultPage" element={<Result />} />

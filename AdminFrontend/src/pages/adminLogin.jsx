@@ -66,6 +66,9 @@ const LoginPage = () => {
                     {successMessage && <p className="success-message">{successMessage}</p>}
                     <button type="submit" className="form-btn">Login</button>
                 </form>
+                <div className="redirect-link" style={{ marginTop: '15px', textAlign: 'center' }}>
+                    <p>Don't have an account? <Link to="/signup">Signup here</Link></p>
+                </div>
 
             </div>
         </div>

@@ -17,9 +17,7 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
       await axios.put(`http://localhost:4000/api/users/edit-user/${user._id}`, {
         name,
         email,
-        role,
         userId,
-        score,
         sex,
       });
 
@@ -61,22 +59,11 @@ const EditUserModal = ({ user, setShowModal, fetchUsers }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <label>Role</label>
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
         <label>Sex</label>
         <select value={sex} onChange={(e) => setSex(e.target.value)}>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
         </select>
-        <label>Score</label>
-        <input
-          type="number"
-          value={score}
-          onChange={(e) => setScore(e.target.value)}
-        />
         <label>One-Time Password Change (Optional)</label>
         <input
           type="text"

@@ -4,13 +4,15 @@ import axios from 'axios'; // Import axios to send HTTP requests
 import '../styles/signup.css';
 
 const SignupPage = () => {
+    const [name, setName] = useState("");
+    const [sex, setSex] = useState("Male");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const navigate = useNavigate(); // To navigate after success
-  
+
     // Function to handle form submission
     async function handleSignup(e) {
         e.preventDefault();
@@ -24,8 +26,10 @@ const SignupPage = () => {
 
         try {
             const response = await axios.post("http://localhost:4000/api/register", {
+                name,
                 email,
-                password
+                password,
+                sex
             });
             console.log(response.data);
             setSuccessMessage("Registration successful! Redirecting...");
@@ -37,12 +41,22 @@ const SignupPage = () => {
             setTimeout(() => setError(""), 4000); // Clear error message after 4 seconds
         }
     }
-      
+
     return (
         <div className="form-container">
             <div className="form">
                 <h2>Signup</h2>
                 <form onSubmit={handleSignup}>
+                    <div className="form-group">
+                        <label htmlFor="name">Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </div>
                     <div className="form-group">
                         <label htmlFor="email">Email</label>
                         <input
@@ -52,6 +66,18 @@ const SignupPage = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="sex">Sex</label>
+                        <select
+                            id="sex"
+                            value={sex}
+                            onChange={(e) => setSex(e.target.value)}
+                            required
+                        >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
                     </div>
                     <div className="form-group">
                         <label htmlFor="password">Password</label>

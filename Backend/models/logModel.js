@@ -3,6 +3,16 @@ import bcrypt from 'bcrypt';
 
 // Check if the model already exists before defining it
 const signUpSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    sex: {
+        type: String,
+        enum: ['Male', 'Female'],
+        default: 'Male',
+        required: true,
+    },
     email: {
         type: String,
         required: true,

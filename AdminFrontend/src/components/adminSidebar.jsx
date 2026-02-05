@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaClipboardList, FaQuestionCircle, FaUsers, FaThList, FaChartLine, FaEnvelope, FaTachometerAlt } from "react-icons/fa";  // Importing icons
+import { FaClipboardList, FaQuestionCircle, FaUsers, FaThList, FaChartLine, FaEnvelope, FaTachometerAlt, FaUser } from "react-icons/fa";  // Importing icons
 import "../styles/sidebar.css";
 
 const Sidebar = () => {
@@ -39,6 +39,10 @@ const Sidebar = () => {
         <a href="reports">
           <FaChartLine className="sidebar-icon" />
           <span className="sidebar-text">Reports</span>
+        </a>
+        <a href="profile">
+          <FaUser className="sidebar-icon" />
+          <span className="sidebar-text">Profile</span>
         </a>
         <a href="messages">
           <FaEnvelope className="sidebar-icon" />

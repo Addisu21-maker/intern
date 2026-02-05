@@ -2,15 +2,20 @@ import React, { useState } from 'react';
 import axios from 'axios'; // Import axios
 import '../styles/modal.css'; // Ensure to style this modal in a separate file
 
-const AddUserModal = ({ setShowModal, fetchUsers }) => {
+const AddUserModal = ({ setShowModal, fetchUsers, switchToImport }) => {
   const [userData, setUserData] = useState({
-    userId: '', // Added userId field
+    userId: '',
     name: '',
     email: '',
     role: 'user',
     sex: 'Male',
-    score: 0 // Default score
+    score: 0
   });
+
+  React.useEffect(() => {
+    const generatedId = 'UID01' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    setUserData(prev => ({ ...prev, userId: generatedId }));
+  }, [setShowModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,18 +78,6 @@ const AddUserModal = ({ setShowModal, fetchUsers }) => {
             />
           </div>
           <div className="input-group">
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              name="role"
-              value={userData.role}
-              onChange={handleChange}
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div className="input-group">
             <label htmlFor="sex">Sex</label>
             <select
               id="sex"
@@ -96,20 +89,19 @@ const AddUserModal = ({ setShowModal, fetchUsers }) => {
               <option value="Female">Female</option>
             </select>
           </div>
-          <div className="input-group">
-            <label htmlFor="score">Score</label>
-            <input
-              type="number"
-              id="score"
-              name="score"
-              value={userData.score}
-              onChange={handleChange}
-              required
-            />
-          </div>
           <button type="submit">Add User</button>
         </form>
         <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
+
+        <div style={{ marginTop: '20px', borderTop: '1px solid #ddd', paddingTop: '20px' }}>
+          <button
+            type="button"
+            onClick={switchToImport}
+            style={{ backgroundColor: '#007bff', color: 'white', width: '100%', padding: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            Import from Database
+          </button>
+        </div>
       </div>
     </div>
   );
