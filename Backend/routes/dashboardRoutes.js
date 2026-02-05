@@ -1,33 +1,37 @@
 import express from "express";
-import User from "../models/userModel.js"; // Your existing User model
-import Quiz from "../models/quizModel.js"; // Your existing Quiz model
-const router = express.Router();
+import User from "../models/userModel.js";
+import Exam from "../models/examModel.js";
+import ExamResult from "../models/examResultModel.js";
 
-import QuizResult from "../models/quizResultModel.js";
+const router = express.Router();
 
 router.get("/dashboard-stats", async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
-    const totalQuizzes = await Quiz.countDocuments();
-    const totalAttempts = await QuizResult.countDocuments();
+    // Count Exams
+    const totalExams = await Exam.countDocuments();
+    // Count Exam Attempts
+    const totalAttempts = await ExamResult.countDocuments();
 
-    // Calculate overall pass rate (assuming pass is > 50% score for simplicity across all)
-    // To do this accurately we need max score per quiz.
-    // For now, let's use a simpler metric: Average Score across all attempts if max score is unavailable easily in aggregation
-    // Or better, let's fetch all results and quizzes to compute.
+    // Calculate overall pass rate
+    // We'll define a simple pass metric: score >= 50% of questions
+    // This requires knowing the total possible questions for each exam.
 
-    // Fetch all quizzes to map ID -> Question Count (Max Score)
-    const quizzes = await Quiz.find().select('questions');
-    const quizMaxScores = {};
-    quizzes.forEach(q => {
-      quizMaxScores[q._id.toString()] = q.questions.length;
+    const exams = await Exam.find().select('questions');
+    const examQuestionCounts = {};
+    exams.forEach(e => {
+      examQuestionCounts[e._id.toString()] = e.questions.length;
     });
 
-    const results = await QuizResult.find();
+    const results = await ExamResult.find();
     let totalPasses = 0;
 
     results.forEach(r => {
-      const maxScore = quizMaxScores[r.quizId.toString()] || 0;
+      const examId = r.examId._id ? r.examId._id.toString() : r.examId.toString();
+      const maxScore = examQuestionCounts[examId] || 0;
+
+      // If maxScore is 0, we can't really judge pass/fail properly, but let's assume if they got > 0 they passed? 
+      // Or mostly safe to check score >= maxScore / 2
       if (maxScore > 0 && r.score >= (maxScore / 2)) {
         totalPasses++;
       }
@@ -37,7 +41,7 @@ router.get("/dashboard-stats", async (req, res) => {
 
     res.json({
       users: totalUsers,
-      quizzes: totalQuizzes,
+      exams: totalExams,      // updated key from 'quizzes'
       attempts: totalAttempts,
       passRate,
     });
@@ -49,18 +53,21 @@ router.get("/dashboard-stats", async (req, res) => {
 
 router.get("/dashboard-chart-data", async (req, res) => {
   try {
-    const quizzes = await Quiz.find().select('quizName questions');
-    const results = await QuizResult.find();
+    const exams = await Exam.find().select('examName questions');
+    const results = await ExamResult.find();
 
-    const chartData = quizzes.map(quiz => {
-      const quizResults = results.filter(r => r.quizId.toString() === quiz._id.toString());
-      const attempts = quizResults.length;
+    const chartData = exams.map(exam => {
+      const examResults = results.filter(r => {
+        const rExamId = r.examId._id ? r.examId._id.toString() : r.examId.toString();
+        return rExamId === exam._id.toString();
+      });
+      const attempts = examResults.length;
 
       let passes = 0;
-      const maxScore = quiz.questions.length;
+      const maxScore = exam.questions.length;
 
       if (maxScore > 0) {
-        quizResults.forEach(r => {
+        examResults.forEach(r => {
           if (r.score >= (maxScore / 2)) passes++;
         });
       }
@@ -68,7 +75,7 @@ router.get("/dashboard-chart-data", async (req, res) => {
       const passRate = attempts ? ((passes / attempts) * 100).toFixed(1) : 0;
 
       return {
-        quizName: quiz.quizName,
+        examName: exam.examName, // updated key from 'quizName'
         attempts,
         passRate
       };

@@ -7,12 +7,12 @@ import { dirname, join } from 'path';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import questionRoutes from './routes/questionRoutes.js';
-import quizRoutes from './routes/quizRoutes.js';
+import examRoutes from './routes/examRoutes.js';
 import loginRoute from './routes/loginRoute.js';
 import sinupRoute from './routes/sinupRoute.js';
 import adminAuthRoutes from './routes/adminAuthRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
-import quizResultRoutes from './routes/quizResultRoutes.js'
+import examResultRoutes from './routes/examResultRoutes.js'
 import contactRoutes from './routes/contactRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,9 +33,9 @@ const MONGO_URL = process.env.MONGODB_URI;
 if (!MONGO_URL) {
   console.error('❌ Error: MONGODB_URI is not set in environment variables');
   console.error('Please create a .env file in the Backend folder with:');
-  console.error('MONGODB_URI=mongodb://localhost:27017/quiz_app');
+  console.error('MONGODB_URI=mongodb://localhost:27017/exam_app');
   console.error('Or for MongoDB Atlas:');
-  console.error('MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/quiz_app');
+  console.error('MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/exam_app');
   process.exit(1);
 }
 
@@ -57,12 +57,12 @@ mongoose
 // Root route
 app.get('/', (req, res) => {
   res.json({
-    message: 'Quiz App API is running!',
+    message: 'Exam App API is running!',
     version: '1.0.0',
     endpoints: {
       users: '/api/users',
       categories: '/api/categories',
-      quizzes: '/api/quizzes',
+      exams: '/api/exams',
       questions: '/api/questions',
       dashboard: '/api/dashboard-stats',
       login: '/api/users/login',
@@ -75,12 +75,12 @@ app.get('/', (req, res) => {
 app.use('/api', userRoutes); // Prefix user-related routes with `/api/users`
 app.use('/api', categoryRoutes);
 app.use('/api', questionRoutes);
-app.use('/api', quizRoutes);
+app.use('/api', examRoutes);
 app.use('/api/user', sinupRoute); // User signup routes at /api/user/register and /api/user/logging
 app.use('/api', loginRoute); // User login route at /api/users/login
 app.use('/api', adminAuthRoutes); // Admin auth routes at /api/register and /api/login
 app.use('/api', dashboardRoutes)
-app.use('/api', quizResultRoutes)
+app.use('/api', examResultRoutes)
 app.use('/api/contact', contactRoutes);
 
 app.listen(PORT, () => {

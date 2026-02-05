@@ -40,7 +40,7 @@ const ResultPage = ({ userId }) => {
 
   return (
     <div className="result-page">
-      <h2>Quiz Results</h2>
+      <h2>Exam Results</h2>
 
       {result && (
         <div className="result-section">

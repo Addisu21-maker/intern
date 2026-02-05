@@ -37,20 +37,15 @@
 }
 
 .logout-header-btn {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #3da5f5;
   color: white;
-  border: 1px solid white;
+  border: none;
   padding: 8px 20px;
   border-radius: 5px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.logout-header-btn:hover {
-  background-color: white;
-  color: #3da5f5;
 }
 
 @media (max-width: 768px) {

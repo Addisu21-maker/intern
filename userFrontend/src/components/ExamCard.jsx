@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/pagesStyle/quizCard.css';
-import QuizTimer from './QuizTimer.jsx';
+import '../styles/pagesStyle/ExamCard.css';
+import ExamTimer from './ExamTimer.jsx';
 
-const QuizCard = () => {
+const ExamCard = () => {
   const { state } = useLocation();
-  const { questions, quizName, quizId, totalTime } = state || {};
+  const { questions, examName, examId, totalTime } = state || {};
   const navigate = useNavigate();
 
   // Get userId from localStorage (MongoDB _id from login)
   const userId = localStorage.getItem('userId');
-  const timerKey = `quizTime-${quizId}-${userId}`;
+  const timerKey = `examTime-${examId}-${userId}`;
 
   // Initialize timer
   const storedTime = localStorage.getItem(timerKey);
@@ -19,26 +19,26 @@ const QuizCard = () => {
 
   const [currentPage, setCurrentPage] = useState(0);
   const [answers, setAnswers] = useState({}); // keyed by question._id
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizDuration, setQuizDuration] = useState(initialTime);
+  const [examCompleted, setExamCompleted] = useState(false);
+  const [examDuration, setExamDuration] = useState(initialTime);
 
   const QUESTIONS_PER_PAGE = 2;
 
-  // Sync quizDuration if totalTime changes
+  // Sync examDuration if totalTime changes
   useEffect(() => {
     if (totalTime) {
       const newTime = totalTime * 60;
-      setQuizDuration(newTime);
+      setExamDuration(newTime);
       localStorage.setItem(timerKey, newTime);
     }
   }, [totalTime, timerKey]);
 
   // Timer countdown
   useEffect(() => {
-    if (quizCompleted) return;
+    if (examCompleted) return;
 
     const interval = setInterval(() => {
-      setQuizDuration(prev => {
+      setExamDuration(prev => {
         const newDuration = Math.max(0, prev - 1);
         localStorage.setItem(timerKey, newDuration);
         return newDuration;
@@ -46,36 +46,36 @@ const QuizCard = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [quizCompleted, timerKey]);
+  }, [examCompleted, timerKey]);
 
   // Check for timeout
   useEffect(() => {
-    if (quizDuration === 0 && !quizCompleted) {
+    if (examDuration === 0 && !examCompleted) {
       handleTimeUp();
     }
-  }, [quizDuration, quizCompleted]);
+  }, [examDuration, examCompleted]);
 
-  // Check if user has already taken this quiz
+  // Check if user has already taken this exam
   useEffect(() => {
     const checkExistingResult = async () => {
       try {
         const res = await axios.get(`http://localhost:4000/api/user/${userId}/results`);
-        const alreadyTaken = res.data.some(r => (r.quizId?._id || r.quizId) === quizId);
+        const alreadyTaken = res.data.some(r => (r.examId?._id || r.examId) === examId);
         if (alreadyTaken) {
-          setQuizCompleted(true);
+          navigate('/exams', { replace: true });
         }
       } catch (err) {
         console.error('Error checking existing results:', err);
       }
     };
 
-    if (userId && quizId) {
+    if (userId && examId) {
       checkExistingResult();
     }
-  }, [userId, quizId, navigate]);
+  }, [userId, examId, navigate]);
 
   const handleTimeUp = () => {
-    setQuizCompleted(true);
+    setExamCompleted(true);
     handleSubmit(true); // pass true to indicate auto-submit
   };
 
@@ -103,24 +103,23 @@ const QuizCard = () => {
     return score;
   };
 
-  // Submit quiz
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Submit exam
   const handleSubmit = async (isAuto = false) => {
     if (!userId) {
-      alert('You must be logged in to submit the quiz.');
+      alert('You must be logged in to submit the exam.');
       return;
     }
+    if (isSubmitting) return;
 
+    setIsSubmitting(true);
     const score = calculateScore();
-    const timeElapsedInSeconds = initialTime - quizDuration; // Time spent on quiz
+    const timeElapsedInSeconds = initialTime - examDuration; // Time spent on exam
     const timeTaken = (timeElapsedInSeconds / 60).toFixed(2); // Convert to minutes
-    console.log('Submitting quiz:', {
-      userId,
-      answers,
-      score,
-      timeTaken
-    });
+
     try {
-      await axios.post(`http://localhost:4000/api/quizzes/${quizId}/submit`, {
+      await axios.post(`http://localhost:4000/api/exams/${examId}/submit`, {
         userId,
         answers, // already keyed by question._id
         score,
@@ -128,10 +127,11 @@ const QuizCard = () => {
       });
 
       localStorage.removeItem(timerKey);
-      setQuizCompleted(true); // mark completed AFTER successful submission
+      setExamCompleted(true); // mark completed AFTER successful submission
     } catch (error) {
-      console.error('Error submitting quiz:', error.response || error);
-      alert('Failed to submit quiz. Make sure you are logged in.');
+      console.error('Error submitting exam:', error.response || error);
+      alert('Failed to submit exam. Please try again.');
+      setIsSubmitting(false);
     }
   };
 
@@ -144,14 +144,21 @@ const QuizCard = () => {
   return (
     <div className="quiz-container">
       <div className="quiz-header">
-        <h2>{quizName}</h2>
-        <QuizTimer timeLeft={quizDuration} />
+        <h2>{examName}</h2>
+        <ExamTimer timeLeft={examDuration} />
       </div>
 
-      {quizCompleted ? (
+      {examCompleted ? (
         <div className="quiz-completed-message">
-          <h3>Thank you, you got {calculateScore()} out of {questions.length}</h3>
-          <button className="quiz-button" onClick={() => navigate('/quizPage')}>
+          <h3>Thank you!</h3>
+          <div className="result-summary">
+            <p className="score-text">
+              You got {calculateScore()} out of {questions.length}
+            </p>
+
+
+          </div>
+          <button className="quiz-button" onClick={() => navigate('/exams')}>
             Back to Dashboard
           </button>
         </div>
@@ -190,7 +197,9 @@ const QuizCard = () => {
                 {(currentPage + 1) * QUESTIONS_PER_PAGE < questions.length ? (
                   <button className="quiz-button" onClick={handleNext}>Next</button>
                 ) : (
-                  <button className="quiz-button" onClick={handleSubmit}>Submit</button>
+                  <button className="quiz-button" onClick={() => handleSubmit(false)} disabled={isSubmitting}>
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
                 )}
               </div>
             </div>
@@ -203,4 +212,4 @@ const QuizCard = () => {
   );
 };
 
-export default QuizCard;
+export default ExamCard;

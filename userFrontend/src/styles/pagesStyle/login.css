@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #f3f4f6;
+  background-color: #e6f7ff;
 }
 
 /* Parent Container */
@@ -11,7 +11,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #e3eaf2;
+  background-color: #e6f7ff;
   padding-bottom: 50px;
 }
 

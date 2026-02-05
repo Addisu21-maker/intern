@@ -5,29 +5,29 @@ import "../styles/Reports.css";
 const Reports = () => {
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
-  const [quizzes, setQuizzes] = useState([]);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // Filter States
-  const [selectedQuiz, setSelectedQuiz] = useState("All Quizzes");
+  const [selectedExam, setSelectedExam] = useState("All Exams");
   const [selectedSex, setSelectedSex] = useState("All Genders");
   const [scoreThreshold, setScoreThreshold] = useState("");
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/quiz-results");
+        const res = await axios.get("http://localhost:4000/api/exam-results");
         const data = res.data || [];
         setResults(data);
         setFilteredResults(data);
 
-        // Extract unique quizzes for filter
-        const uniqueQuizzes = ["All Quizzes", ...new Set(data.map(r => r.quizId?.quizName).filter(Boolean))];
-        setQuizzes(uniqueQuizzes);
+        // Extract unique exams for filter
+        const uniqueExams = ["All Exams", ...new Set(data.map(r => r.examId?.examName).filter(Boolean))];
+        setExams(uniqueExams);
       } catch (err) {
-        console.error("Error fetching quiz results:", err);
-        setError(err.response?.data?.message || "Failed to fetch quiz results.");
+        console.error("Error fetching exam results:", err);
+        setError(err.response?.data?.message || "Failed to fetch exam results.");
       } finally {
         setLoading(false);
       }
@@ -40,8 +40,8 @@ const Reports = () => {
   useEffect(() => {
     let updatedResults = results;
 
-    if (selectedQuiz !== "All Quizzes") {
-      updatedResults = updatedResults.filter(r => r.quizId?.quizName === selectedQuiz);
+    if (selectedExam !== "All Exams") {
+      updatedResults = updatedResults.filter(r => r.examId?.examName === selectedExam);
     }
 
     if (selectedSex !== "All Genders") {
@@ -53,13 +53,13 @@ const Reports = () => {
     }
 
     setFilteredResults(updatedResults);
-  }, [selectedQuiz, selectedSex, scoreThreshold, results]);
+  }, [selectedExam, selectedSex, scoreThreshold, results]);
 
   if (loading) {
     return (
       <div className="reports">
-        <h2>Quiz Reports</h2>
-        <p>Loading quiz results...</p>
+        <h2>Exam Reports</h2>
+        <p>Loading exam results...</p>
       </div>
     );
   }
@@ -67,7 +67,7 @@ const Reports = () => {
   if (error) {
     return (
       <div className="reports">
-        <h2>Quiz Reports</h2>
+        <h2>Exam Reports</h2>
         <p className="error-message">{error}</p>
       </div>
     );
@@ -75,14 +75,14 @@ const Reports = () => {
 
   return (
     <div className="reports">
-      <h2>Quiz Reports</h2>
+      <h2>Exam Reports</h2>
 
       {/* Filter Bar */}
       <div className="filter-bar">
         <div className="filter-group">
-          <label>Quiz:</label>
-          <select value={selectedQuiz} onChange={(e) => setSelectedQuiz(e.target.value)}>
-            {quizzes.map(q => <option key={q} value={q}>{q}</option>)}
+          <label>Exam:</label>
+          <select value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)}>
+            {exams.map(q => <option key={q} value={q}>{q}</option>)}
           </select>
         </div>
 
@@ -106,7 +106,7 @@ const Reports = () => {
         </div>
 
         <button className="reset-btn" onClick={() => {
-          setSelectedQuiz("All Quizzes");
+          setSelectedExam("All Exams");
           setSelectedSex("All Genders");
           setScoreThreshold("");
         }}>Reset</button>
@@ -120,7 +120,7 @@ const Reports = () => {
           filteredResults.map((result, index) => {
             const userName = result.userId?.name || result.userId?.userId || result.userId?.email || "Anonymous";
             const userSex = result.userId?.sex || "N/A";
-            const quizName = result.quizId?.quizName || "Unknown Quiz";
+            const examName = result.examId?.examName || "Unknown Exam";
             const totalQuestions = result.answers ? Object.keys(result.answers).length : 0;
             const percentage = totalQuestions > 0 ? ((result.score / totalQuestions) * 100).toFixed(1) : 0;
 
@@ -133,7 +133,7 @@ const Reports = () => {
                   </span>
                 </div>
                 <div className="report-card-body">
-                  <p><strong>Quiz:</strong> {quizName}</p>
+                  <p><strong>Exam:</strong> {examName}</p>
                   <p><strong>Score:</strong> {result.score} / {totalQuestions} ({percentage}%)</p>
                   {result.timeTaken && (
                     <p><strong>Time Taken:</strong> {result.timeTaken} minutes</p>

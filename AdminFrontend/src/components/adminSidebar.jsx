@@ -20,9 +20,9 @@ const Sidebar = () => {
           <FaTachometerAlt className="sidebar-icon" />
           <span className="sidebar-text">Dashboard</span>
         </a>
-        <a href="quiz-management">
+        <a href="exam-management">
           <FaClipboardList className="sidebar-icon" />
-          <span className="sidebar-text">Quizzes</span>
+          <span className="sidebar-text">Exams</span>
         </a>
         <a href="question-management">
           <FaQuestionCircle className="sidebar-icon" />

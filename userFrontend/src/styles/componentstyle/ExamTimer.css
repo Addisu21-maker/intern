@@ -1,5 +1,5 @@
-/* Modern QuizTimer Styles */
-.quiz-timer {
+/* Modern ExamTimer Styles */
+.exam-timer {
   text-align: right;
   font-family: 'Outfit', sans-serif;
   font-size: 1.25rem;
@@ -17,7 +17,7 @@
 }
 
 /* Add a subtle "pulse" if time is low (e.g., < 1 minute) */
-.quiz-timer.low-time {
+.exam-timer.low-time {
   color: #ef4444;
   background: #fef2f2;
   border-color: #fee2e2;
@@ -35,7 +35,7 @@
 }
 
 @media (max-width: 768px) {
-  .quiz-timer {
+  .exam-timer {
     font-size: 1.1rem;
     padding: 6px 12px;
   }

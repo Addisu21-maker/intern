@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import '../styles/pagesStyle/quizPage.css';
+import '../styles/pagesStyle/ExamPage.css';
 
-const UserPage = () => {
+const ExamPage = () => {
   const [categories, setCategories] = useState([]);
-  const [quizzes, setQuizzes] = useState([]);
-  const [completedQuizIds, setCompletedQuizIds] = useState(new Set());
-  const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [exams, setExams] = useState([]);
+  const [completedExamIds, setCompletedExamIds] = useState(new Set());
+  const [selectedExam, setSelectedExam] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [showPasscodeModal, setShowPasscodeModal] = useState(false);
   const [passcode, setPasscode] = useState('');
@@ -29,49 +29,49 @@ const UserPage = () => {
     navigate('/login');
   };
 
-  // Fetch all quizzes and user's results
+  // Fetch all exams and user's results
   const fetchData = async () => {
     try {
-      // Fetch quizzes
-      const quizResponse = await axios.get('http://localhost:4000/api/quizzes');
-      setQuizzes(quizResponse.data);
+      // Fetch exams
+      const examResponse = await axios.get('http://localhost:4000/api/exams');
+      setExams(examResponse.data);
 
-      // Fetch user's completed quizzes if logged in
+      // Fetch user's completed exams if logged in
       if (userId) {
         const resultResponse = await axios.get(`http://localhost:4000/api/user/${userId}/results`);
-        const completedIds = new Set(resultResponse.data.map(r => r.quizId?._id || r.quizId));
-        setCompletedQuizIds(completedIds);
+        const completedIds = new Set(resultResponse.data.map(r => r.examId?._id || r.examId));
+        setCompletedExamIds(completedIds);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
-  // Fetch questions and pass total time to QuizCard
-  const fetchQuestions = async (quizId, enteredPasscode) => {
+  // Fetch questions and pass total time to ExamCard
+  const fetchQuestions = async (examId, enteredPasscode) => {
     try {
-      // 1️⃣ Fetch the latest quiz info
-      const quizRes = await axios.get(`http://localhost:4000/api/quizzes`);
-      const latestQuiz = quizRes.data.find((q) => q._id === quizId);
+      // 1️⃣ Fetch the latest exam info
+      const examRes = await axios.get(`http://localhost:4000/api/exams`);
+      const latestExam = examRes.data.find((q) => q._id === examId);
 
-      if (!latestQuiz) {
-        setMessage('Quiz not found');
+      if (!latestExam) {
+        setMessage('Exam not found');
         return;
       }
 
       // 2️⃣ Check passcode and fetch questions
-      const questionsRes = await axios.post(`http://localhost:4000/api/quiz/${quizId}/questions`, {
+      const questionsRes = await axios.post(`http://localhost:4000/api/exam/${examId}/questions`, {
         passcode: enteredPasscode,
       });
 
       if (questionsRes.data && questionsRes.data.length > 0) {
-        // 3️⃣ Navigate to QuizCard with latest totalTime
-        navigate(`/quiz/${quizId}`, {
+        // 3️⃣ Navigate to ExamCard with latest totalTime
+        navigate(`/exam/${examId}`, {
           state: {
-            quizId: latestQuiz._id,
+            examId: latestExam._id,
             questions: questionsRes.data,
-            quizName: latestQuiz.quizName,
-            totalTime: latestQuiz.totalTime, // ✅ latest value
+            examName: latestExam.examName,
+            totalTime: latestExam.totalTime, // ✅ latest value
           },
         });
         setMessage('');
@@ -91,14 +91,14 @@ const UserPage = () => {
   };
 
 
-  // Trigger when a user clicks on a quiz
-  const handleQuizClick = (quiz) => {
-    if (completedQuizIds.has(quiz._id)) {
-      setMessage('You have already completed this quiz!');
+  // Trigger when a user clicks on an exam
+  const handleExamClick = (exam) => {
+    if (completedExamIds.has(exam._id)) {
+      setMessage('You have already completed this exam!');
       setTimeout(() => setMessage(''), 3000);
       return;
     }
-    setSelectedQuiz(quiz);
+    setSelectedExam(exam);
     setShowPasscodeModal(true);
   };
 
@@ -106,8 +106,8 @@ const UserPage = () => {
   const handlePasscodeSubmit = async (e) => {
     e.preventDefault();
     setMessage(''); // Clear any previous error messages
-    if (selectedQuiz) {
-      await fetchQuestions(selectedQuiz._id, passcode);
+    if (selectedExam) {
+      await fetchQuestions(selectedExam._id, passcode);
     }
   };
 
@@ -118,7 +118,7 @@ const UserPage = () => {
 
   return (
     <div>
-      <h1 align="center ">Quizzes DashBoard</h1>
+      <h1 align="center ">Examinations Dashboard</h1>
       {message && (
         <div style={{
           textAlign: 'center',
@@ -134,33 +134,40 @@ const UserPage = () => {
         </div>
       )}
       <div className="quizzes-container">
-        {quizzes.length > 0 ? (
-          quizzes.map((quiz) => (
+        {exams.length > 0 ? (
+          exams.map((exam) => (
             <div
-              key={quiz._id}
-              className="quiz-card"
-              onClick={() => handleQuizClick(quiz)}
+              key={exam._id}
+              className={`quiz-card ${completedExamIds.has(exam._id) ? 'completed' : ''}`}
+              onClick={() => !completedExamIds.has(exam._id) && handleExamClick(exam)}
             >
-              <h3>{quiz.quizName}</h3>
-              <p>Category: {quiz.categories.map((cat) => cat.name).join(', ')}</p>
-              {quiz.startDate && (
+              <h3>{exam.examName}</h3>
+              <p>Category: {exam.categories.map((cat) => cat.name).join(', ')}</p>
+              {exam.startDate && (
                 <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                  <b>Scheduled:</b> {quiz.startDate} at {quiz.startTime || 'N/A'}
+                  <b>Scheduled:</b> {exam.startDate} at {exam.startTime || 'N/A'}
                 </p>
               )}
-              <p>Time: {quiz.totalTime} minutes</p>
-              <button className="start-button">Start</button>
+              <p>Time: {exam.totalTime} minutes</p>
+              {completedExamIds.has(exam._id) ? (
+                <button className="start-button" disabled style={{ backgroundColor: '#ccc', cursor: 'not-allowed' }}>
+                  Completed
+                </button>
+              ) : (
+                <button className="start-button">Start</button>
+              )}
             </div>
+
           ))
         ) : (
-          <p>No quizzes available at the moment.</p>
+          <p>No exams available at the moment.</p>
         )}
       </div>
 
       {showPasscodeModal && (
         <div className="passcode-modal">
           <form onSubmit={handlePasscodeSubmit}>
-            <h3>Enter Passcode for taking the quiz {selectedQuiz?.quizName}</h3>
+            <h3>Enter Passcode for taking the exam {selectedExam?.examName}</h3>
             <input
               type="password"
               value={passcode}
@@ -192,4 +199,4 @@ const UserPage = () => {
   );
 };
 
-export default UserPage;
+export default ExamPage;

@@ -23,7 +23,7 @@ ChartJS.register(
 const Dashboard = () => {
   const [stats, setStats] = useState({
     users: 0,
-    quizzes: 0,
+    exams: 0,
     attempts: 0,
     passRate: 0,
   });
@@ -41,7 +41,7 @@ const Dashboard = () => {
       const data = await response.json();
       setStats({
         users: data.users || 0,
-        quizzes: data.quizzes || 0,
+        exams: data.exams || data.quizzes || 0,
         attempts: data.attempts || 0,
         passRate: data.passRate || 0,
       });
@@ -82,7 +82,7 @@ const Dashboard = () => {
 
   // Chart Configuration
   const barChartData = {
-    labels: chartData.map(d => d.quizName),
+    labels: chartData.map(d => d.examName || d.quizName),
     datasets: [
       {
         label: 'Attempts',
@@ -100,8 +100,8 @@ const Dashboard = () => {
   const chartOptions = {
     responsive: true,
     plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Quiz Statistics' },
+      legend: { position: 'top', onClick: null },
+      title: { display: true, text: 'Exam Statistics' },
     },
   };
 
@@ -122,8 +122,8 @@ const Dashboard = () => {
           <p>{stats.users}</p>
         </div>
         <div className="stat-card">
-          <h3>Quizzes</h3>
-          <p>{stats.quizzes}</p>
+          <h3>Exams</h3>
+          <p>{stats.exams}</p>
         </div>
         <div className="stat-card">
           <h3>Attempts</h3>

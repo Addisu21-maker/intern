@@ -14,7 +14,7 @@ const AdminHeader = ({ toggleSidebar }) => {
   return (
     <header className="admin-header">
       <div className="logo" onClick={() => navigate("/dashboard")}>
-        Quiz Admin
+        SWZOES - Admin Panel
       </div>
       <div className="header-actions">
         <button className="logout-header-btn" onClick={handleLogout}>

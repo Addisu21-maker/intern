@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-import QuizManagement from "./pages/QuizManagement.jsx";
+import ExamManagement from "./pages/ExamManagement.jsx";
 import UserManagement from "./pages/userManagement";
 import CatagoryManagement from "./pages/categoryManagement.jsx";
 import AdminProfile from './pages/profile.jsx'
@@ -68,10 +68,10 @@ const App = () => {
           }
         />
         <Route
-          path="/quiz-management"
+          path="/exam-management"
           element={
             <ProtectedRoute>
-              <QuizManagement />
+              <ExamManagement />
             </ProtectedRoute>
           }
         />

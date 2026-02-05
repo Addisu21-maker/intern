@@ -1,3 +1,7 @@
+body {
+    background-color: #e6f7ff;
+}
+
 .user-messages-container {
     max-width: 900px;
     margin: 50px auto;

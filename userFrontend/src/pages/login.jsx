@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/pagesStyle/login.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -6,6 +6,13 @@ import axios from 'axios';
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({ userId: '', password: '' });
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      navigate('/exams');
+    }
+  }, [navigate]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -22,12 +29,12 @@ const LoginPage = () => {
       if (response.status === 200) {
         const user = response.data.user;
 
-        localStorage.setItem('userId', user._id);  // store user _id for quiz submission
+        localStorage.setItem('userId', user._id);  // store user _id for exam submission
         localStorage.setItem('token', user._id);   // optional
         localStorage.setItem('name', user.name);
 
         alert('Login successful!');
-        navigate('/quizPage');  // redirect
+        navigate('/exams');  // redirect
       } else {
         alert('Login failed.');
       }
@@ -72,10 +79,10 @@ const LoginPage = () => {
         </div>
         <div className="vertical-line"></div>
         <div className="description">
-          <h2>About the Quiz App</h2>
-          <p>The quiz app is simple and intuitive with its own set of rules.</p>
+          <h2>About the System</h2>
+          <p>The South Wollo Zone Online Examination System is simple and intuitive with its own set of rules.</p>
           <p>
-            Enter your user ID and default password that is given by the Admin , click the login button, and navigate to the dashboard to start answering quiz questions.
+            Enter your user ID and  password that is given by the Admin, click the login button, and navigate to the dashboard to start answering examination questions.
           </p>
         </div>
       </div>

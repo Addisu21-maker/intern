@@ -7,7 +7,7 @@ const ResultCard = () => {
 
   return (
     <div>
-      <h2>Quiz Completed!</h2>
+      <h2>Exam Completed!</h2>
       <p>Your score: {score}</p>
     </div>
   );

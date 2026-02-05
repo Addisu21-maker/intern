@@ -7,7 +7,7 @@ export default function Footer() {
     <div className="footer">
       <div className="footer-content">
         <div className="footer-info">
-          <p>© 2026 Quiz web App. All rights reserved.</p>
+          <p>© 2025 SWZOES. All rights reserved.</p>
         </div>
       </div>
     </div>

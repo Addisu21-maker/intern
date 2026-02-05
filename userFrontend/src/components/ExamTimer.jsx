@@ -1,7 +1,7 @@
 import React from 'react';
-import '../styles/componentstyle/QuizTimer.css';
+import '../styles/componentstyle/ExamTimer.css';
 
-const QuizTimer = ({ timeLeft }) => {
+const ExamTimer = ({ timeLeft }) => {
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -9,10 +9,10 @@ const QuizTimer = ({ timeLeft }) => {
   };
 
   return (
-    <div className="quiz-timer">
+    <div className="exam-timer">
       <p>Time Left: {formatTime(timeLeft)}</p>
     </div>
   );
 };
 
-export default QuizTimer;
+export default ExamTimer;

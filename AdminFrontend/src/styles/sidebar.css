@@ -1,6 +1,6 @@
 .sidebar {
   width: 230px;
-  height: 100vh;
+  height: calc(100vh - 80px);
   background: linear-gradient(135deg, #1e1a22 0%, #3da5f5 100%);
   color: white;
   display: flex;
@@ -11,6 +11,7 @@
   box-shadow: none;
   /* No shadow */
   border-right: none;
+  overflow-y: auto;
 }
 
 .sidebar.closed {

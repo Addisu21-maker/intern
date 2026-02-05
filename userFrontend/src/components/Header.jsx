@@ -26,7 +26,7 @@ export default function Header() {
   return (
     <div className="header">
       <div className="name">
-        <span>?</span>Quiz
+        SWZOES
       </div>
 
       {/* Hamburger Icon */}
@@ -66,14 +66,10 @@ export default function Header() {
           </>
         )}
         <div className="one-links">
-          {localStorage.getItem('token') ? (
+          {localStorage.getItem('token') && (
             <button className="button1" onClick={handleLogout}>
               Logout
             </button>
-          ) : (
-            <NavLink className="link" to="/login">
-              Login
-            </NavLink>
           )}
         </div>
       </div>
