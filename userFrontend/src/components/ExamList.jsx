@@ -7,18 +7,32 @@ const ExamList = () => {
   const [exams, setExams] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch exams from the backend
+  const [takenExams, setTakenExams] = useState(new Set());
+
+  // Fetch exams and user results from the backend
   useEffect(() => {
-    const fetchExams = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/exams'); // Adjust URL as needed
-        setExams(response.data);
+        const email = localStorage.getItem('email'); // Assuming email is stored in localStorage
+        const userId = localStorage.getItem('userId');
+
+        // Parallel fetch for exams and taken status
+        const [examsRes, resultsRes] = await Promise.all([
+          axios.get('http://localhost:4000/api/exams'),
+          email ? axios.get(`http://localhost:4000/api/user/email/${email}/results`) : Promise.resolve({ data: [] })
+        ]);
+
+        setExams(examsRes.data);
+
+        // Mark which exam IDs have already been taken
+        const takenIds = new Set(resultsRes.data.map(r => r.examId?._id || r.examId));
+        setTakenExams(takenIds);
       } catch (error) {
-        console.error('Error fetching exams:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchExams();
+    fetchData();
   }, []);
 
   return (
@@ -34,13 +48,22 @@ const ExamList = () => {
               </p>
             )}
             <p>{exam.examName}</p>
-            <button
-              className="start-exam-btn"
-              onClick={() => navigate(`/exam/${exam.id || exam._id}`)}
-              style={{ padding: '8px 16px', backgroundColor: '#3da5f5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-            >
-              Select Exam
-            </button>
+            {takenExams.has(exam._id) ? (
+              <button
+                disabled
+                style={{ padding: '8px 16px', backgroundColor: '#555', color: 'white', border: 'none', borderRadius: '4px', cursor: 'not-allowed', fontWeight: 'bold' }}
+              >
+                Completed
+              </button>
+            ) : (
+              <button
+                className="start-exam-btn"
+                onClick={() => navigate(`/exam/${exam._id}`)}
+                style={{ padding: '8px 16px', backgroundColor: '#3da5f5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Select Exam
+              </button>
+            )}
           </li>
         ))}
       </ul>

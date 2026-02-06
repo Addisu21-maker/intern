@@ -4,6 +4,19 @@ import Exam from '../models/examModel.js';
 import ExamResult from '../models/examResultModel.js';
 import mongoose from 'mongoose';
 
+// GET: Fetch results for a specific user by EMAIL (persistent)
+router.get('/user/email/:email/results', async (req, res) => {
+    const { email } = req.params;
+    try {
+        const results = await ExamResult.find({ userEmail: email.toLowerCase() })
+            .populate('examId', 'examName');
+        res.status(200).json(results);
+    } catch (err) {
+        console.error('Error fetching user results by email:', err);
+        res.status(500).json({ message: 'Failed to fetch user results' });
+    }
+});
+
 // GET: Fetch results for a specific user
 router.get('/user/:userId/results', async (req, res) => {
     const { userId } = req.params;

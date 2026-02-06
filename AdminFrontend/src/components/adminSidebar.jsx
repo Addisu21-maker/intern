@@ -9,6 +9,9 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("email");
+    localStorage.removeItem("user");
     sessionStorage.removeItem("authToken");
     navigate("/logging");
   };

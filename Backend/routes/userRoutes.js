@@ -140,14 +140,24 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// Delete user by ID
+// Delete user by ID with Role Protection
 router.delete('/users/delete-user/:id', async (req, res) => {
   const userId = req.params.id;
+  const requesterEmail = req.headers['requester-email'];
+  const isSuperAdmin = requesterEmail === 'admin@gmail.com';
+
   try {
-    const deletedUser = await User.findByIdAndDelete(userId);
-    if (!deletedUser) {
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Protection Logic: Only Super Admin can delete other Admins
+    if (userToDelete.role === 'admin' && !isSuperAdmin) {
+      return res.status(403).json({ message: 'Access Denied: Only Super Admin can delete admin accounts.' });
+    }
+
+    await User.findByIdAndDelete(userId);
     res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -155,14 +165,36 @@ router.delete('/users/delete-user/:id', async (req, res) => {
   }
 });
 
-// Delete all users (students only)
-router.delete('/users/delete-all', async (req, res) => {
+// Delete all students (Available to all admins)
+router.delete('/users/delete-all-students', async (req, res) => {
   try {
     const result = await User.deleteMany({ role: 'user' });
-    res.status(200).json({ message: `${result.deletedCount} users deleted successfully` });
+    res.status(200).json({ message: `${result.deletedCount} students deleted successfully` });
   } catch (error) {
-    console.error('Error deleting all users:', error);
-    res.status(500).json({ message: 'Failed to delete all users' });
+    console.error('Error deleting all students:', error);
+    res.status(500).json({ message: 'Failed to delete all students' });
+  }
+});
+
+// Delete all admins (Super Admin Only)
+router.delete('/users/delete-all-admins', async (req, res) => {
+  const requesterEmail = req.headers['requester-email'];
+  const SUPER_ADMIN_EMAIL = 'admin@gmail.com';
+
+  if (requesterEmail !== SUPER_ADMIN_EMAIL) {
+    return res.status(403).json({ message: 'Access Denied: Only Super Admin can delete all admins.' });
+  }
+
+  try {
+    // Delete all admins EXCEPT the Super Admin themselves
+    const result = await User.deleteMany({
+      role: 'admin',
+      email: { $ne: SUPER_ADMIN_EMAIL }
+    });
+    res.status(200).json({ message: `${result.deletedCount} admins deleted successfully. Super Admin account preserved.` });
+  } catch (error) {
+    console.error('Error deleting all admins:', error);
+    res.status(500).json({ message: 'Failed to delete all admins' });
   }
 });
 

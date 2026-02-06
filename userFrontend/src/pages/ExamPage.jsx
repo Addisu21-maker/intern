@@ -36,9 +36,10 @@ const ExamPage = () => {
       const examResponse = await axios.get('http://localhost:4000/api/exams');
       setExams(examResponse.data);
 
-      // Fetch user's completed exams if logged in
-      if (userId) {
-        const resultResponse = await axios.get(`http://localhost:4000/api/user/${userId}/results`);
+      // Fetch user's completed exams using EMAIL (persistent)
+      const userEmail = localStorage.getItem('email');
+      if (userEmail) {
+        const resultResponse = await axios.get(`http://localhost:4000/api/user/email/${userEmail}/results`);
         const completedIds = new Set(resultResponse.data.map(r => r.examId?._id || r.examId));
         setCompletedExamIds(completedIds);
       }
@@ -150,7 +151,7 @@ const ExamPage = () => {
               )}
               <p>Time: {exam.totalTime} minutes</p>
               {completedExamIds.has(exam._id) ? (
-                <button className="start-button" disabled style={{ backgroundColor: '#ccc', cursor: 'not-allowed' }}>
+                <button className="start-button" disabled style={{ backgroundColor: '#555', color: 'white', cursor: 'not-allowed', fontWeight: 'bold' }}>
                   Completed
                 </button>
               ) : (

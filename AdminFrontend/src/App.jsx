@@ -8,6 +8,7 @@ import AdminProfile from './pages/profile.jsx'
 import QuestionManagement from "./pages/QuestionManagement.jsx";
 import Reports from "./pages/Reports";
 import ContactMessages from "./pages/ContactMessages";
+import RequestTracking from "./pages/RequestTracking";
 import AdminHeader from "./components/adminHeader";
 import Sidebar from "./components/adminSidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -20,7 +21,7 @@ import Signup from "./pages/signup.jsx";
 // Component to conditionally render layout
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/' || location.pathname === '/logging' || location.pathname === '/signup';
+  const isAuthPage = location.pathname === '/' || location.pathname === '/logging' || location.pathname === '/signup' || location.pathname === '/request-tracking';
 
   // Check if user is authenticated
   const isAuthenticated = () => {
@@ -123,6 +124,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/request-tracking" element={<RequestTracking />} />
         {/* Default redirect to dashboard if authenticated, otherwise to login */}
         <Route path="/" element={<LoginPage />} />
       </Routes>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaTrash, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaFileUpload } from 'react-icons/fa';
 import '../styles/QuestionManagement.css';
+import BulkQuestionModal from '../components/BulkQuestionModal';
 
 const QuestionManagement = () => {
   const [exams, setExams] = useState([]); // For exams
@@ -11,85 +12,27 @@ const QuestionManagement = () => {
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [editingQuestion, setEditingQuestion] = useState(null);
 
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [allQuestions, setAllQuestions] = useState([]);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
-  // Fetch all questions for the bank
-  useEffect(() => {
-    const fetchAllQuestions = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/api/all-questions');
-        if (response.ok) {
-          const data = await response.json();
-          setAllQuestions(data);
-        }
-      } catch (error) {
-        console.error('Error fetching question bank:', error);
-      }
-    };
-    if (showImportModal) {
-      fetchAllQuestions();
-    }
-  }, [showImportModal]);
 
-  const handleImportQuestion = async (question) => {
-    if (!selectedExamId) {
-      alert('Please select an exam first.');
-      return;
-    }
-
-    // Create a copy of the question for the current exam
-    const data = {
-      examId: selectedExamId,
-      questionText: question.questionText || question.question,
-      options: question.options,
-      correctAnswer: question.correctAnswer
-    };
-
-    try {
-      const response = await fetch('http://localhost:4000/api/add-question', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        alert('Question imported successfully');
-        fetchQuestions(); // Refresh current exam questions
-      } else {
-        alert('Failed to import question');
-      }
-    } catch (error) {
-      console.error('Error importing question:', error);
-      alert('Error importing question');
-    }
-  };
 
   const fetchQuestions = async () => {
-    if (!selectedExamId) return; // Fetch questions only when an exam is selected
+    if (!selectedExamId) {
+      setQuestions([]);
+      return;
+    }
     try {
-      const response = await fetch(
-        `http://localhost:4000/api/questions/${selectedExamId}`
-      );
+      const response = await fetch(`http://localhost:4000/api/questions/${selectedExamId}`);
       if (!response.ok) throw new Error('Failed to fetch questions');
       const data = await response.json();
       setQuestions(data);
     } catch (error) {
       console.error('Error fetching questions:', error);
+      setQuestions([]);
     }
   };
 
-  // Fetch categories for dropdown
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch('http://localhost:4000/api/categories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
+
   useEffect(() => {
     fetchExams(); // Fetch exams when the component loads
   }, []);
@@ -108,10 +51,9 @@ const QuestionManagement = () => {
 
   const handleAddOrUpdateQuestion = async () => {
     if (!selectedExamId) {
-      alert('Please select an exam before adding a question.');
+      alert('Please select an exam first.');
       return;
     }
-
     const data = {
       examId: selectedExamId,
       questionText,
@@ -159,18 +101,57 @@ const QuestionManagement = () => {
     setCorrectAnswer(question.correctAnswer || '');
   };
 
-  // Run fetch functions when component loads or when selected exam changes
-  useEffect(() => {
-    fetchExams(); // Fetch exams when the component loads
-  }, []);
+  const handleDeleteAllQuestions = async () => {
+    if (!selectedExamId) {
+      alert('Please select an exam first.');
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete ALL questions for this exam? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:4000/api/delete-all-questions/${selectedExamId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('All questions deleted successfully');
+        fetchQuestions();
+      } else {
+        alert('Failed to delete all questions');
+      }
+    } catch (error) {
+      console.error('Error deleting all questions:', error);
+      alert('Error deleting all questions');
+    }
+  };
 
   useEffect(() => {
-    fetchQuestions(); // Fetch questions when the selected exam changes
+    fetchQuestions(); // Refresh question list when the selected exam filter changes
   }, [selectedExamId]);
 
   return (
     <div className="question-management">
-      <h2>Manage Questions</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>Manage Questions</h2>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={() => setShowBulkModal(true)}
+            style={{ backgroundColor: '#10b981', color: 'white', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <FaFileUpload />
+            Bulk Import (CSV)
+          </button>
+          <button
+            onClick={handleDeleteAllQuestions}
+            style={{ backgroundColor: '#ef4444', color: 'white', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Delete All Questions
+          </button>
+        </div>
+      </div>
 
       {/* Select Exam */}
       <div className="select-quiz">
@@ -227,66 +208,37 @@ const QuestionManagement = () => {
         </button>
         {editingQuestion && <button onClick={resetForm}>Cancel</button>}
 
-
-
-        {/* Import from Database Section */}
-        <div style={{ marginTop: '20px', borderTop: '1px solid #ddd', paddingTop: '20px' }}>
-          <button onClick={() => setShowImportModal(true)} style={{ backgroundColor: '#007bff', color: 'white', width: '100%' }}>
-            Import from Question Bank
-          </button>
-        </div>
       </div>
 
-      {/* Import Modal */}
-      {showImportModal && (
-        <div className="import-modal" style={{
-          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          backgroundColor: 'white', padding: '20px', zIndex: 1000,
-          boxShadow: '0 4px 8px rgba(0,0,0,0.2)', width: '80%', maxHeight: '80vh', overflowY: 'auto'
-        }}>
-          <h3>Select Questions to Import</h3>
-          <button onClick={() => setShowImportModal(false)} style={{ float: 'right', background: 'red', color: 'white' }}>Close</button>
 
-          <div style={{ marginTop: '20px' }}>
-            {allQuestions.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                    <th style={{ padding: '10px' }}>Question</th>
-                    <th style={{ padding: '10px' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allQuestions.map((q) => (
-                    <tr key={q._id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '10px' }}>{q.questionText || q.question}</td>
-                      <td style={{ padding: '10px' }}>
-                        <button onClick={() => handleImportQuestion(q)} style={{ background: '#28a745', color: 'white' }}>
-                          Add
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No questions found in the database.</p>
-            )}
-          </div>
-        </div>
+
+      {/* Bulk Import Modal */}
+      {showBulkModal && (
+        <BulkQuestionModal
+          setShowModal={setShowBulkModal}
+          fetchQuestions={fetchQuestions}
+          examId={selectedExamId}
+        />
       )}
-      {showImportModal && <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }} onClick={() => setShowImportModal(false)}></div>}
 
       {/* Question List */}
       {
         questions.length > 0 && (
           <div className="question-list">
-            <h3>Questions in this Exam</h3>
+            <h3 style={{ color: '#374151', marginBottom: '15px' }}>
+              Questions for: <span style={{ color: '#10b981' }}>{exams.find(e => e._id === selectedExamId)?.examName}</span>
+              {exams.find(e => e._id === selectedExamId)?.categories?.[0]?.name && (
+                <span style={{ fontSize: '0.9rem', color: '#6b7280', marginLeft: '10px' }}>
+                  (Category: {exams.find(e => e._id === selectedExamId)?.categories?.[0]?.name})
+                </span>
+              )}
+            </h3>
             <table>
               <thead>
                 <tr>
                   <th>Question</th>
                   <th>Options</th>
+                  <th>Category</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -298,6 +250,9 @@ const QuestionManagement = () => {
                       {question.options.map((option, index) => (
                         <div key={index}>{option}</div>
                       ))}
+                    </td>
+                    <td>
+                      <span className="category-badge">{question.category || 'Uncategorized'}</span>
                     </td>
                     <td>
                       <button onClick={() => handleEditQuestion(question)}>

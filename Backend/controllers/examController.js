@@ -1,6 +1,7 @@
 import Exam from '../models/examModel.js';
 import Question from '../models/questionModel.js';
 import User from '../models/userModel.js';
+import ExamResult from '../models/examResultModel.js';
 import { sendEmail } from '../utils/emailService.js';
 
 // Add a question to an exam
@@ -155,20 +156,25 @@ export const submitExam = async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields: userId, answers, and score are required' });
         }
 
-        // Check if the user has already submitted this exam
-        // Note: You need to import ExamResult model at the top
-        const existingResult = await import('../models/examResultModel.js').then(m => m.default.findOne({
-            userId,
-            examId
-        }));
-
-        if (existingResult) {
-            return res.status(403).json({ message: 'You have already submitted this exam.' });
+        // Fetch user to get their email (for persistent tracking)
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        const ExamResult = await import('../models/examResultModel.js').then(m => m.default);
+        // Check if the user has already submitted this exam using their EMAIL (persistent)
+        const existingResult = await ExamResult.findOne({
+            userEmail: user.email,
+            examId: examId
+        });
+
+        if (existingResult) {
+            return res.status(403).json({ message: 'You have already submitted this exam. Duplicate attempts are not allowed.' });
+        }
+
         const newResult = new ExamResult({
             userId,
+            userEmail: user.email,
             examId,
             answers,
             score,

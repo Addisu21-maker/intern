@@ -1,5 +1,5 @@
 import express from 'express';
-import { addQuestion, getQuestionsByExamId, updateQuestion, deleteQuestion, uploadQuestions, getAllQuestions } from '../controllers/questionControllers.js';
+import { addQuestion, getQuestionsByExamId, updateQuestion, deleteQuestion, uploadQuestions, getAllQuestions, deleteAllQuestions } from '../controllers/questionControllers.js';
 
 const router = express.Router();
 
@@ -15,13 +15,13 @@ router.post('/add-question', addQuestion);
 // Get questions by exam ID
 router.get('/questions/:examId', getQuestionsByExamId);
 
-//update a question by question id 
-
+// Update a question by id
 router.put('/update-question/:id', updateQuestion);
 
-//delete question by  question id
-
+// Delete question by id
 router.delete('/delete-question/:id', deleteQuestion);
 
+// Delete all questions for an exam
+router.delete('/delete-all-questions/:examId', deleteAllQuestions);
 
 export default router;

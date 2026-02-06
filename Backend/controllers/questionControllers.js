@@ -10,12 +10,25 @@ export const addQuestion = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
+    // Fetch the exam to get its category
+    const exam = await Exam.findById(examId).populate('categories');
+    if (!exam) {
+      return res.status(404).json({ message: 'Exam not found' });
+    }
+
+    // Determine category name
+    const categoryName = exam.categories && exam.categories.length > 0
+      ? exam.categories[0].name
+      : 'Uncategorized';
+
     // Create the new question
     const newQuestion = new Question({
       examId,
       questionText,
       options,
       correctAnswer,
+      category: categoryName,
+      examName: exam.examName
     });
 
     await newQuestion.save();
@@ -27,14 +40,10 @@ export const addQuestion = async (req, res) => {
       { new: true }
     );
 
-    if (!updatedExam) {
-      return res.status(404).json({ message: 'Exam not found' });
-    }
-
     res.status(201).json({
-      message: 'Question added successfully',
+      message: `Question added successfully to category: ${categoryName}`,
       question: newQuestion,
-      exam: updatedExam, // Optionally return the updated exam
+      exam: updatedExam,
     });
   } catch (error) {
     console.error('Error adding question:', error);
@@ -105,22 +114,34 @@ export const uploadQuestions = async (req, res) => {
       return res.status(400).json({ message: 'Exam ID and an array of questions are required' });
     }
 
-    // Validate format of each question
-    const validQuestions = questions.every(q => q.questionText && q.options && q.correctAnswer);
-    if (!validQuestions) {
-      return res.status(400).json({ message: 'Each question must have questionText, options, and correctAnswer' });
+    // Fetch the exam to get its category
+    const examFound = await Exam.findById(examId).populate('categories');
+    if (!examFound) {
+      return res.status(404).json({ message: 'Exam not found' });
     }
 
-    // Add examId to each question
-    const questionsWithExamId = questions.map(q => ({ ...q, examId }));
+    // Determine category name (strictly from the exam)
+    const categoryName = (examFound.categories && examFound.categories.length > 0)
+      ? examFound.categories[0].name
+      : 'Uncategorized';
 
-    // Insert all questions
-    const createdQuestions = await Question.insertMany(questionsWithExamId);
+    // Process questions - must have examId
+    const processedQuestions = questions
+      .filter(q => q.questionText && q.options && q.correctAnswer)
+      .map(q => ({
+        ...q,
+        examId,
+        category: categoryName,
+        examName: examFound.examName
+      }));
 
-    // Get IDs of created questions
+    if (processedQuestions.length === 0) {
+      return res.status(400).json({ message: 'No valid questions found. Each question must have questionText, options, and correctAnswer' });
+    }
+
+    const createdQuestions = await Question.insertMany(processedQuestions);
+
     const questionIds = createdQuestions.map(q => q._id);
-
-    // Update the exam to include these new question IDs
     await Exam.findByIdAndUpdate(
       examId,
       { $push: { questions: { $each: questionIds } } },
@@ -128,12 +149,38 @@ export const uploadQuestions = async (req, res) => {
     );
 
     res.status(201).json({
-      message: `${createdQuestions.length} questions uploaded successfully`,
+      message: `${createdQuestions.length} questions uploaded successfully and assigned to category: ${categoryName}`,
       questions: createdQuestions
     });
   } catch (error) {
     console.error('Error uploading questions:', error);
     res.status(500).json({ message: 'Error uploading questions', error: error.message });
+  }
+};
+
+// Delete all questions for a specific exam
+export const deleteAllQuestions = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: 'Exam ID is required' });
+    }
+
+    // Delete all questions associated with this examId
+    await Question.deleteMany({ examId });
+
+    // Update the exam to clear its questions array
+    await Exam.findByIdAndUpdate(
+      examId,
+      { $set: { questions: [] } },
+      { new: true }
+    );
+
+    res.status(200).json({ message: 'All questions for this exam deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting all questions:', error);
+    res.status(500).json({ message: 'Error deleting all questions' });
   }
 };
 

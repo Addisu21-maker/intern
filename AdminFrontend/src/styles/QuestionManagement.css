@@ -141,6 +141,16 @@ h2 {
   gap: 10px;
 }
 
+.category-badge {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
 @media (max-width: 768px) {
 
   .select-quiz,

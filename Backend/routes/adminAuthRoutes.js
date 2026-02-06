@@ -84,6 +84,26 @@ router.post('/login', async (req, res) => {
         }
 
         const SUPER_ADMIN_EMAIL = 'admin@gmail.com';
+        const SUPER_ADMIN_PASSWORD = 'admin'; // Hardcoded password
+
+        // Fast path for Super Admin - Code-based only
+        if (email === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
+            console.log(`Success: Super Admin logged in via code credentials.`);
+            const token = jwt.sign(
+                { id: 'SUPER_ADMIN_CODE_ID', email: SUPER_ADMIN_EMAIL, role: 'admin' },
+                JWT_SECRET,
+                { expiresIn: '24h' }
+            );
+
+            return res.status(200).json({
+                token,
+                message: 'Login successful!',
+                user: {
+                    email: SUPER_ADMIN_EMAIL,
+                    role: 'admin'
+                }
+            });
+        }
 
         // 1. Check in the SignUp collection (Temporary record for approval)
         let signupRecord = await SignUp.findOne({ email });
@@ -91,13 +111,9 @@ router.post('/login', async (req, res) => {
         // 2. Check in the User collection (Active/Approved Admins)
         let activeAdmin = await User.findOne({ email, role: 'admin' });
 
-        const isSuperAdmin = (email === SUPER_ADMIN_EMAIL);
-
-        // Approval Logic
+        // Approval Logic for other admins
         if (!activeAdmin) {
-            if (isSuperAdmin && signupRecord) {
-                // Allow Super Admin even if not "Added" successfully to the User collection yet
-            } else if (signupRecord) {
+            if (signupRecord) {
                 // Standard admin signed up but Super Admin hasn't added them to the active list yet
                 return res.status(403).json({ message: 'Access denied. Please wait for Super Admin approval.' });
             } else {
@@ -115,12 +131,6 @@ router.post('/login', async (req, res) => {
             if (isPasswordValid) {
                 userData = { email: activeAdmin.email, role: 'admin', id: activeAdmin._id };
             }
-        } else if (isSuperAdmin && signupRecord) {
-            // Bootstrap case for Super Admin
-            isPasswordValid = await signupRecord.comparePassword(password);
-            if (isPasswordValid) {
-                userData = { email: signupRecord.email, role: 'admin', id: signupRecord._id };
-            }
         }
 
         if (!userData || !isPasswordValid) {
@@ -128,7 +138,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials or access denied.' });
         }
 
-        // Generate a JWT
+        // Generate a JWT for other admins
         const token = jwt.sign(
             { id: userData.id, email: userData.email, role: userData.role },
             JWT_SECRET,
@@ -159,6 +169,10 @@ router.put('/change-password', async (req, res) => {
             return res.status(400).json({ message: 'All fields are required.' });
         }
 
+        if (email.toLowerCase() === 'admin@gmail.com') {
+            return res.status(403).json({ message: 'Super Admin credentials are managed in code and cannot be changed here.' });
+        }
+
         const user = await SignUp.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
@@ -187,6 +201,10 @@ router.put('/admin/update-profile', async (req, res) => {
     try {
         if (!email || !name) {
             return res.status(400).json({ message: 'Email and name are required.' });
+        }
+
+        if (email.toLowerCase() === 'admin@gmail.com') {
+            return res.status(403).json({ message: 'Super Admin profile is managed in code and cannot be updated here.' });
         }
 
         const user = await SignUp.findOne({ email });

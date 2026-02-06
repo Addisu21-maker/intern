@@ -30,6 +30,7 @@ const LoginPage = () => {
         const user = response.data.user;
 
         localStorage.setItem('userId', user._id);  // store user _id for exam submission
+        localStorage.setItem('email', user.email); // store email for persistent tracking
         localStorage.setItem('token', user._id);   // optional
         localStorage.setItem('name', user.name);
 

@@ -11,14 +11,26 @@ const ExamCard = () => {
 
   // Get userId from localStorage (MongoDB _id from login)
   const userId = localStorage.getItem('userId');
-  const timerKey = `examTime-${examId}-${userId}`;
 
-  // Initialize timer
+  // Redirect if state is missing (happens on hard refresh if state wasn't persisted by router)
+  useEffect(() => {
+    if (!questions || !examName) {
+      console.warn('Exam state missing, redirecting...');
+      navigate('/exams');
+    }
+  }, [questions, examName, navigate]);
+  const timerKey = `examTime-${examId}-${userId}`;
+  const answersKey = `examAnswers-${examId}-${userId}`;
+  const pageKey = `examPage-${examId}-${userId}`;
+
+  // Initialize progress from localStorage
   const storedTime = localStorage.getItem(timerKey);
   const initialTime = storedTime ? parseInt(storedTime) : (totalTime ? totalTime * 60 : 30 * 60);
+  const storedAnswers = localStorage.getItem(answersKey);
+  const storedPage = localStorage.getItem(pageKey);
 
-  const [currentPage, setCurrentPage] = useState(0);
-  const [answers, setAnswers] = useState({}); // keyed by question._id
+  const [currentPage, setCurrentPage] = useState(storedPage ? parseInt(storedPage) : 0);
+  const [answers, setAnswers] = useState(storedAnswers ? JSON.parse(storedAnswers) : {}); // keyed by question._id
   const [examCompleted, setExamCompleted] = useState(false);
   const [examDuration, setExamDuration] = useState(initialTime);
 
@@ -47,6 +59,20 @@ const ExamCard = () => {
 
     return () => clearInterval(interval);
   }, [examCompleted, timerKey]);
+
+  // Sync answers to localStorage
+  useEffect(() => {
+    if (examId && userId) {
+      localStorage.setItem(answersKey, JSON.stringify(answers));
+    }
+  }, [answers, examId, userId, answersKey]);
+
+  // Sync currentPage to localStorage
+  useEffect(() => {
+    if (examId && userId) {
+      localStorage.setItem(pageKey, currentPage.toString());
+    }
+  }, [currentPage, examId, userId, pageKey]);
 
   // Check for timeout
   useEffect(() => {
@@ -127,6 +153,8 @@ const ExamCard = () => {
       });
 
       localStorage.removeItem(timerKey);
+      localStorage.removeItem(answersKey);
+      localStorage.removeItem(pageKey);
       setExamCompleted(true); // mark completed AFTER successful submission
     } catch (error) {
       console.error('Error submitting exam:', error.response || error);

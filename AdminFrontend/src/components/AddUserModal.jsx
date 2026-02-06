@@ -93,15 +93,6 @@ const AddUserModal = ({ setShowModal, fetchUsers, switchToImport }) => {
         </form>
         <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
 
-        <div style={{ marginTop: '20px', borderTop: '1px solid #ddd', paddingTop: '20px' }}>
-          <button
-            type="button"
-            onClick={switchToImport}
-            style={{ backgroundColor: '#007bff', color: 'white', width: '100%', padding: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-          >
-            Import from Database
-          </button>
-        </div>
       </div>
     </div>
   );

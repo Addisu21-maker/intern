@@ -26,7 +26,7 @@ const signUpSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['admin', 'user'],
-        default: 'admin', // Default to admin for admin signup
+        default: 'user', // Default to user for student signup
     },
 });
 

@@ -9,28 +9,37 @@ const AdminProfile = () => {
     confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [adminName, setAdminName] = useState('');
 
   useEffect(() => {
     const userStr = localStorage.getItem('user');
+    const storedEmail = localStorage.getItem('email');
+
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
-        setAdminEmail(user.email || '');
+        setAdminEmail(user.email || storedEmail || '');
       } catch (e) {
         console.error("Error parsing user from local storage", e);
+        if (storedEmail) setAdminEmail(storedEmail);
       }
+    } else if (storedEmail) {
+      setAdminEmail(storedEmail);
     }
     fetchAdminInfo();
   }, []);
 
   const fetchAdminInfo = async () => {
     const userStr = localStorage.getItem('user');
-    if (!userStr) return;
-    const user = JSON.parse(userStr);
+    const storedEmail = localStorage.getItem('email');
+    const email = storedEmail || (userStr ? JSON.parse(userStr).email : null);
+
+    if (!email) return;
+
     try {
       const response = await fetch(`http://localhost:4000/api/user/signups`);
       const data = await response.json();
-      const currentAdmin = data.find(u => u.email === user.email);
+      const currentAdmin = data.find(u => u.email === email);
       if (currentAdmin) {
         setAdminName(currentAdmin.name || '');
       }
@@ -39,7 +48,6 @@ const AdminProfile = () => {
     }
   };
 
-  const [adminName, setAdminName] = useState('');
 
   const handleNameUpdate = async () => {
     try {

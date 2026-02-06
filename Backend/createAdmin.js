@@ -32,6 +32,8 @@ const createAdmin = async () => {
         }
 
         const admin = new SignUp({
+            name: 'Super Admin',
+            sex: 'Male',
             email,
             password,
             role: 'admin'

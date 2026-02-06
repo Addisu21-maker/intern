@@ -1,0 +1,203 @@
+/* Request Tracking Styles - Mirroring User Frontend */
+.request-tracking-container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    min-height: 400px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.request-tracking-container h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.email-search-section {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+    justify-content: center;
+}
+
+.email-search-section input {
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 400px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.email-search-section input:focus {
+    border-color: #3da5f5;
+    outline: none;
+}
+
+.search-button {
+    padding: 12px 25px;
+    background-color: #3da5f5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.search-button:hover {
+    background-color: #2b94e4;
+}
+
+.search-button:disabled {
+    background-color: #b0c4de;
+    cursor: not-allowed;
+}
+
+.messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.message-card {
+    border: 1px solid #e0e6ed;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    transition: transform 0.2s;
+    text-align: left;
+}
+
+.message-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.message-date {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.message-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.message-status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.message-status.replied {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.original-message {
+    margin-bottom: 20px;
+}
+
+.original-message strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #495057;
+}
+
+.original-message p {
+    color: #212529;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.admin-reply {
+    background-color: #e7f3ff;
+    padding: 15px;
+    border-left: 4px solid #3da5f5;
+    border-radius: 4px;
+}
+
+.admin-reply strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #0056b3;
+    font-size: 15px;
+}
+
+.reply-content {
+    color: #2c3e50;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.no-messages-info {
+    text-align: center;
+    color: #6c757d;
+    padding: 50px;
+    font-style: italic;
+}
+
+.error-message {
+    color: #dc3545;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.back-to-login {
+    display: block;
+    text-align: center;
+    margin-top: 30px;
+    color: #3da5f5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+@media screen and (max-width: 768px) {
+    .request-tracking-container {
+        margin: 20px 10px;
+        padding: 15px;
+    }
+
+    .request-tracking-container h2 {
+        font-size: 22px;
+    }
+
+    .email-search-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .email-search-section input {
+        max-width: none;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .message-card {
+        padding: 15px;
+    }
+}
