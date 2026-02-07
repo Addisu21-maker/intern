@@ -9,17 +9,48 @@ const ContactMessages = () => {
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [currentUserEmail, setCurrentUserEmail] = useState('');
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
     useEffect(() => {
         fetchMessages();
     }, []);
 
+    // Helper function to display who replied
+    const getRepliedByDisplay = (repliedBy) => {
+        if (!repliedBy || repliedBy === 'Admin') return (isSuperAdmin ? 'Admin' : 'Admin');
+
+        // Handle Super Admin case
+        if (repliedBy === 'Super Admin') {
+            return isSuperAdmin ? 'You' : 'Super Admin';
+        }
+
+        // Handle standard admin case - compare emails
+        const currentEmail = (currentUserEmail || localStorage.getItem('adminEmail') || '').toLowerCase().trim();
+        const repliedEmail = repliedBy.toLowerCase().trim();
+
+        return repliedEmail === currentEmail ? 'You' : repliedBy;
+    };
+
     const fetchMessages = async () => {
         try {
+            const adminEmail = localStorage.getItem('adminEmail') || '';
+            setCurrentUserEmail(adminEmail);
+            const superAdminStatus = adminEmail === 'admin@gmail.com';
+            setIsSuperAdmin(superAdminStatus);
             const response = await axios.get('http://localhost:4000/api/contact/all');
-            // Sort messages by date descending (newest first)
-            const sortedMessages = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            setMessages(sortedMessages);
+
+            let allMessages = response.data;
+
+            // Filter for Standard Admins
+            if (!superAdminStatus) {
+                allMessages = allMessages.filter(msg =>
+                    msg.senderRole === 'user' ||
+                    msg.email.toLowerCase() === adminEmail.toLowerCase()
+                );
+            }
+
+            setMessages(allMessages);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -27,17 +58,36 @@ const ContactMessages = () => {
         }
     };
 
-    const handleReplyClick = (msg) => {
+    const handleReplyClick = async (msg) => {
         setSelectedMessage(msg);
         setReplyMessage(msg.reply || '');
         setShowModal(true);
+
+        // If an Admin opens a pending message, mark it as 'seen'
+        if (msg.status === 'pending') {
+            try {
+                const adminEmail = localStorage.getItem('adminEmail') || localStorage.getItem('email') || 'Admin';
+                const adminIdentifier = adminEmail === 'admin@gmail.com' ? 'Super Admin' : adminEmail;
+
+                await axios.patch(`http://localhost:4000/api/contact/seen/${msg._id}`, { seenBy: adminIdentifier });
+                fetchMessages();
+            } catch (err) {
+                console.error('Error marking as seen:', err);
+            }
+        }
     };
 
     const handleSendReply = async () => {
         if (!replyMessage.trim()) return;
         setSubmitting(true);
         try {
-            await axios.post(`http://localhost:4000/api/contact/reply/${selectedMessage._id}`, { replyMessage });
+            const adminEmail = localStorage.getItem('adminEmail') || localStorage.getItem('email') || 'Admin';
+            const adminIdentifier = adminEmail === 'admin@gmail.com' ? 'Super Admin' : adminEmail;
+
+            await axios.post(`http://localhost:4000/api/contact/reply/${selectedMessage._id}`, {
+                replyMessage,
+                repliedBy: adminIdentifier
+            });
             alert('Reply sent successfully!');
             setShowModal(false);
             setReplyMessage('');
@@ -80,6 +130,7 @@ const ContactMessages = () => {
                                     <th>Email</th>
                                     <th>Message</th>
                                     <th>Status</th>
+                                    <th>Replied By</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -96,19 +147,34 @@ const ContactMessages = () => {
                                             </span>
                                         </td>
                                         <td>
+                                            {msg.status === 'replied' ? (
+                                                <span style={{ color: '#3da5f5', fontWeight: '500', fontSize: '0.9rem' }}>
+                                                    {getRepliedByDisplay(msg.repliedBy)}
+                                                </span>
+                                            ) : (
+                                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>—</span>
+                                            )}
+                                        </td>
+                                        <td>
                                             <div className="action-buttons">
                                                 <button
                                                     className="reply-btn"
                                                     onClick={() => handleReplyClick(msg)}
                                                 >
-                                                    {msg.status === 'replied' ? 'View Reply' : 'Reply'}
+                                                    {(!isSuperAdmin && msg.senderRole === 'admin')
+                                                        ? 'View'
+                                                        : (msg.status === 'replied' ? 'View Reply' : 'Reply')}
                                                 </button>
-                                                <button
-                                                    className="delete-btn"
-                                                    onClick={() => handleDelete(msg._id)}
-                                                >
-                                                    Delete
-                                                </button>
+
+                                                {/* Only Super Admin can delete messages */}
+                                                {isSuperAdmin && (
+                                                    <button
+                                                        className="delete-btn"
+                                                        onClick={() => handleDelete(msg._id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -124,15 +190,39 @@ const ContactMessages = () => {
                     <div className="reply-modal">
                         <h3>{selectedMessage.status === 'replied' ? 'View Reply' : 'Reply to Message'}</h3>
                         <div className="message-details">
-                            <p><strong>From:</strong> {selectedMessage.name} ({selectedMessage.email})</p>
+                            <p><strong>From:</strong> {selectedMessage.email.toLowerCase() === currentUserEmail.toLowerCase() ? 'You' : `${selectedMessage.name} (${selectedMessage.email})`}</p>
                             <p><strong>Original Message:</strong> {selectedMessage.message}</p>
+                            {selectedMessage.status === 'seen' && selectedMessage.seenBy && (
+                                <p style={{ color: '#666', fontSize: '14px' }}>
+                                    <strong>Seen by:</strong> {selectedMessage.seenBy.toLowerCase() === currentUserEmail.toLowerCase() ? 'You' : selectedMessage.seenBy}
+                                </p>
+                            )}
+                            {selectedMessage.status === 'replied' && (
+                                <p>
+                                    <strong>Replied by:</strong> {getRepliedByDisplay(selectedMessage.repliedBy)}
+                                </p>
+                            )}
                         </div>
-                        <textarea
-                            placeholder="Type your reply here..."
-                            value={replyMessage}
-                            onChange={(e) => setReplyMessage(e.target.value)}
-                            disabled={submitting}
-                        />
+
+                        {/* Show textarea only if message is pending/seen. If replied, show as read-only text. */}
+                        {selectedMessage.status === 'replied' ? (
+                            <div className="final-reply-view" style={{ marginTop: '15px', padding: '10px', background: '#f9f9f9', borderRadius: '4px', borderLeft: '4px solid #3da5f5' }}>
+                                <strong>Final Response:</strong>
+                                <p style={{ marginTop: '5px', whiteSpace: 'pre-wrap' }}>{selectedMessage.reply}</p>
+                            </div>
+                        ) : (
+                            /* Only show textarea if it's a user message OR if Super Admin is replying to an admin */
+                            (isSuperAdmin || selectedMessage.senderRole !== 'admin') && (
+                                <textarea
+                                    placeholder="Type your reply here..."
+                                    value={replyMessage}
+                                    onChange={(e) => setReplyMessage(e.target.value)}
+                                    disabled={submitting}
+                                    style={{ width: '100%', minHeight: '100px', marginTop: '15px' }}
+                                />
+                            )
+                        )}
+
                         <div className="modal-actions">
                             <button
                                 className="cancel-btn"
@@ -141,13 +231,16 @@ const ContactMessages = () => {
                             >
                                 Close
                             </button>
-                            <button
-                                className="send-btn"
-                                onClick={handleSendReply}
-                                disabled={submitting || !replyMessage.trim()}
-                            >
-                                {submitting ? 'Sending...' : selectedMessage.status === 'replied' ? 'Update Reply' : 'Send Reply'}
-                            </button>
+                            {/* Hide Send button entirely if already replied to lock the response */}
+                            {selectedMessage.status !== 'replied' && (isSuperAdmin || selectedMessage?.senderRole !== 'admin') && (
+                                <button
+                                    className="send-btn"
+                                    onClick={handleSendReply}
+                                    disabled={submitting || !replyMessage.trim()}
+                                >
+                                    {submitting ? 'Sending...' : 'Send Reply'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

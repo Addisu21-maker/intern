@@ -97,3 +97,35 @@
 .logout-sidebar-btn:hover {
   background-color: #e74c3c;
 }
+
+.notification-badge {
+  background-color: #ef4444;
+  /* Vivid Red */
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 1px 5px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #1e1a22;
+  /* Border to pop against background */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar nav a:hover .notification-badge {
+  transform: translateY(-50%) scale(1.1);
+}
+
+
+.sidebar nav a {
+  position: relative;
+  /* For badge positioning */
+}

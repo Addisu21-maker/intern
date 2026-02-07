@@ -83,6 +83,9 @@ const LoginPage = () => {
           <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
             Forgot password? Please <Link to="/contact">Contact Administrator</Link>.
           </p>
+          <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+            view responses? <Link to="/messages" style={{ fontWeight: 'bold', color: '#3da5f5' }}>Request Tracking</Link>
+          </p>
           <p style={{ marginTop: '10px' }}>
             Don't have an account? <Link to="/signup">Sign up here</Link>
           </p>

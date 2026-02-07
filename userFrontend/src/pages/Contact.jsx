@@ -50,7 +50,8 @@ const ContactPage = () => {
           setSuccessMessage('Failed to send your message.');
         }
       } catch (error) {
-        setSuccessMessage('An error occurred while sending your message.');
+        const errorMessage = error.response?.data?.message || 'An error occurred while sending your message.';
+        setSuccessMessage(errorMessage);
       }
     } else {
       setErrors(newErrors);
@@ -97,6 +98,14 @@ const ContactPage = () => {
           {errors.message && <p className="error">{errors.message}</p>}
         </div>
         <button type="submit" className="submit-button">Send Message</button>
+        <button
+          type="button"
+          className="submit-button"
+          style={{ marginTop: '10px', backgroundColor: '#6c757d' }}
+          onClick={() => window.location.href = '/messages'}
+        >
+          Request Tracking
+        </button>
         {successMessage && <p className="success">{successMessage}</p>}
       </form>
 

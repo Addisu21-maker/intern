@@ -74,7 +74,7 @@ const RequestTracking = () => {
 
                         {msg.status === 'replied' && (
                             <div className="admin-reply">
-                                <strong>Super Admin Response:</strong>
+                                <strong>Response from {msg.repliedBy || 'Admin'}:</strong>
                                 <p className="reply-content">{msg.reply}</p>
                                 <p className="message-date" style={{ marginTop: '10px', fontSize: '12px' }}>
                                     Replied on {new Date(msg.repliedAt).toLocaleString()}

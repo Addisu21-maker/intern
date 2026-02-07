@@ -296,7 +296,7 @@ const UserManagement = () => {
                         <button onClick={() => handleEdit(user)} className="edit-btn">
                           <FaEdit />
                         </button>
-                        {(activeTab !== 'admins' || isSuperAdmin) && (
+                        {isSuperAdmin && (
                           <button onClick={() => handleDelete(user._id)} className="delete-btn">
                             <FaTrash />
                           </button>

@@ -24,7 +24,7 @@ const LoginPage = () => {
                 email: resetEmail,
                 message: resetMessage
             });
-            alert("Request sent successfully! Please check back later using the 'Check Reset Reply' button.");
+            alert("Request sent successfully! Please check back later using the 'Request Tracking' button.");
             setShowForgotModal(false);
             setResetName("");
             setResetEmail("");
